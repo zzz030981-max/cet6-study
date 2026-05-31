@@ -902,24 +902,32 @@
       </div>
 
       <div class="card">
-        <div class="card-title" style="margin-bottom:16px;">🎙️ 精听练习素材</div>
-        <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:16px;">
-          推荐使用以下资源进行精听训练（每天 30 分钟）：
-        </p>
-        <div style="display:grid;gap:8px;">
-          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
-            📻 <strong>BBC 6 Minute English</strong> — 6 分钟一期，语速适中，有文本
+        <div class="card-title" style="margin-bottom:16px;">📋 真题听力资源</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">以下网站提供六级真题听力音频和练习：</p>
+        <a href="https://zhenti.burningvocabulary.cn/cet6" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
+            <div style="font-weight:600;font-size:14px;">🎧 英语真题在线 — 六级听力真题</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">2016-2025年真题听力音频，在线播放，部分免费</div>
           </div>
-          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
-            📻 <strong>VOA Standard English</strong> — 标准美音，话题广泛
+        </a>
+        <a href="https://www.wehuster.com/cet6" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
+            <div style="font-weight:600;font-size:14px;">🎧 WeHUSTER — 六级听力在线练习</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">按考试流程模拟听力练习，免费</div>
           </div>
-          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
-            📻 <strong>TED-Ed</strong> — 5 分钟动画讲解，适合精听+跟读
+        </a>
+        <a href="https://www.bbc.co.uk/learningenglish/english/features/6-minute-english" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
+            <div style="font-weight:600;font-size:14px;">📻 BBC 6 Minute English</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">6分钟一期，语速适中，带文本，免费</div>
           </div>
-          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
-            📻 <strong>六级真题音频</strong> — 反复精听历年真题，最接近考试
+        </a>
+        <a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:12px;background:var(--bg);border-radius:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
+            <div style="font-weight:600;font-size:14px;">📻 VOA Learning English</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">标准美音，语速较慢，适合精听训练，免费</div>
           </div>
-        </div>
+        </a>
       </div>
     </div>
 
@@ -927,6 +935,20 @@
     <div class="section" id="sec-writing">
       <h2 class="section-title">写作模板</h2>
       <p class="section-desc">六级写作高分模板与句型，考前必背</p>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:12px;">📝 真题写作资源</div>
+        <a href="https://zhenti.burningvocabulary.cn/cet6" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;">
+            ✍️ <strong>英语真题在线</strong> — 历年写作真题+范文，部分免费
+          </div>
+        </a>
+        <a href="https://cet4-6.xdf.cn/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;cursor:pointer;">
+            ✍️ <strong>新东方四六级</strong> — 写作技巧+预测范文，免费
+          </div>
+        </a>
+      </div>
 
       <div id="writing-content"></div>
     </div>
@@ -2217,6 +2239,93 @@ const GRAMMAR = [
       {correct: "<em>If (it is) possible</em>, please send the report today.", wrong: "<em>If possible</em>, <em>the report</em> should be sent today."}
     ],
     tip: "省略后分词的逻辑主语必须与主句主语一致，否则就是悬垂分词错误"
+  },
+  {
+    title: "名词性从句 (Noun Clauses)",
+    icon: "📎",
+    rule: "包括主语从句、宾语从句、表语从句、同位语从句。that引导同位语从句时不做成分（区别于定语从句的that做成分）。whether和if的区别：介词后、or not紧随、主语从句只能用whether。",
+    examples: [
+      {correct: "<em>Whether</em> he will come is still unknown.", wrong: "<em>If</em> he will come is still unknown."},
+      {correct: "The fact <em>that</em> he lied shocked everyone.", wrong: "The fact <em>which</em> he lied shocked everyone."},
+      {correct: "It is essential <em>that</em> everyone <em>be</em> on time.", wrong: "It is essential <em>that</em> everyone <em>is</em> on time."}
+    ],
+    tip: "同位语从句的that不省略，定语从句的that做宾语时可省略"
+  },
+  {
+    title: "让步状语从句 (Concessive Clauses)",
+    icon: "🔄",
+    rule: "让步从句的引导词：although/though/even though（虽然）、while（尽管）、as（倒装让步）、no matter + wh- / wh-ever（无论）。as引导让步时必须倒装（形容词/名词/动词原形提前）。",
+    examples: [
+      {correct: "<em>Hard as</em> he tried, he could not solve the problem.", wrong: "<em>As hard</em> he tried, he could not solve the problem."},
+      {correct: "<em>Child as</em> he is, he knows a lot.", wrong: "<em>A child as</em> he is, he knows a lot."},
+      {correct: "<em>No matter what</em> happens, I will support you.", wrong: "<em>No matter</em> happens, I will support you."}
+    ],
+    tip: "as引导让步时名词前不加冠词；though可倒装也可不倒装；although不能倒装"
+  },
+  {
+    title: "独立主格结构 (Absolute Construction)",
+    icon: "📌",
+    rule: "名词/代词 + 分词/形容词/介词短语/不定式，做状语，逻辑主语与主句主语不一致。常见形式：名词+doing（主动）、名词+done（被动）、名词+to do（将来）、with+名词+分词。",
+    examples: [
+      {correct: "<em>Weather permitting</em>, we will go hiking tomorrow.", wrong: "<em>Weather is permitting</em>, we will go hiking tomorrow."},
+      {correct: "<em>The meeting over</em>, everyone left the room.", wrong: "<em>The meeting was over</em>, everyone left the room."},
+      {correct: "He sat there, <em>with his eyes closed</em>.", wrong: "He sat there, <em>with his eyes closing</em>."}
+    ],
+    tip: "独立主格不是句子，没有谓语动词；with结构是最常见的独立主格形式"
+  },
+  {
+    title: "否定转移 (Transferred Negation)",
+    icon: "⚡",
+    rule: "当主句谓语是think/believe/suppose/expect/imagine等表示\"认为\"的动词时，否定应转移到主句。反义疑问句的主语和时态与从句一致。",
+    examples: [
+      {correct: "I <em>don't think</em> he is right.", wrong: "I <em>think</em> he <em>isn't</em> right."},
+      {correct: "I <em>don't believe</em> she has finished, <em>has she</em>?", wrong: "I <em>don't believe</em> she has finished, <em>don't I</em>?"}
+    ],
+    tip: "hope不用否定转移：I hope it won't rain.（不说 I don't hope it will rain.）"
+  },
+  {
+    title: "平行结构 (Parallel Structure)",
+    icon: "⚖️",
+    rule: "and/but/or/rather than/as well as等连接的成分必须语法形式一致：名词对名词、动词对动词、to do对to do、doing对doing。违反平行结构是六级高频改错考点。",
+    examples: [
+      {correct: "She likes <em>reading</em>, <em>writing</em>, and <em>painting</em>.", wrong: "She likes <em>reading</em>, <em>to write</em>, and <em>painting</em>."},
+      {correct: "The project aims <em>to reduce</em> costs and <em>improve</em> efficiency.", wrong: "The project aims <em>to reduce</em> costs and <em>improving</em> efficiency."},
+      {correct: "He is not only intelligent <em>but also</em> hardworking.", wrong: "He is not only intelligent <em>and also</em> hardworking."}
+    ],
+    tip: "not only...but also, either...or, neither...nor 连接的成分也要平行"
+  },
+  {
+    title: "连接词辨析 (Conjunctions)",
+    icon: "🔗",
+    rule: "六级高频考查连接词辨析。表递进：moreover/furthermore/in addition/besides。表转折：however/nevertheless/nonetheless/whereas。表因果：therefore/consequently/hence/thus。表对比：on the contrary/in contrast/on the other hand。",
+    examples: [
+      {correct: "The plan has risks; <em>however</em>, it is worth trying.", wrong: "The plan has risks; <em>but</em>, it is worth trying."},
+      {correct: "He was tired; <em>nevertheless</em>, he continued working.", wrong: "He was tired; <em>but</em>, he continued working."},
+      {correct: "The results were poor. <em>Consequently</em>, the project was cancelled.", wrong: "The results were poor. <em>So</em>, the project was cancelled."}
+    ],
+    tip: "however/nevertheless较正式，适合书面语；but/so较口语化，正式写作中少用"
+  },
+  {
+    title: "as 的多种用法",
+    icon: "📋",
+    rule: "as 是六级最常考的多功能词。用法：1) 当…时（时间）2) 因为（原因）3) 像…一样（方式）4) 尽管（让步，倒装）5) 作为 6) as...as（比较）7) as引导定语从句（正如）。",
+    examples: [
+      {correct: "<em>As</em> is often the case, he arrived late.", wrong: "<em>Which</em> is often the case, he arrived late."},
+      {correct: "Tired <em>as</em> he was, he kept working.", wrong: "Tired <em>although</em> he was, he kept working."},
+      {correct: "She works <em>as</em> a teacher in the local school.", wrong: "She works <em>like</em> a teacher in the local school."}
+    ],
+    tip: "as引导非限制性定语从句可放句首（which不行）；as做\"尽管\"必须倒装"
+  },
+  {
+    title: "with 复合结构",
+    icon: "📎",
+    rule: "with + 名词 + 补语（形容词/副词/介词短语/分词/不定式），表伴随、原因、条件。with结构是独立主格的一种特殊形式，六级写作中使用可加分。",
+    examples: [
+      {correct: "He walked in, <em>with a book in his hand</em>.", wrong: "He walked in, <em>a book in his hand</em>."},
+      {correct: "<em>With the deadline approaching</em>, everyone worked overtime.", wrong: "<em>The deadline approaching</em>, everyone worked overtime."},
+      {correct: "She sat by the window <em>with her eyes fixed on the screen</em>.", wrong: "She sat by the window <em>with her eyes fixing on the screen</em>."}
+    ],
+    tip: "with+名词+doing（主动/进行）/done（被动/完成）/to do（将来）/adj./prep."
   }
 ];
 
