@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CET-6 六级备考助手</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2e3348;
+    --text: #e4e6f0;
+    --text2: #8b8fa8;
+    --accent: #6c7bf7;
+    --accent2: #4f5bd5;
+    --green: #34d399;
+    --red: #f87171;
+    --orange: #fbbf24;
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Layout ── */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform .3s;
+  }
+  .sidebar-header {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .sidebar-header p {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 14px;
+    transition: all .15s;
+    border-left: 3px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(108,123,247,.08);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .nav-item .badge {
+    margin-left: auto;
+    background: var(--accent2);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .streak { display: flex; align-items: center; gap: 6px; }
+  .streak .fire { font-size: 16px; }
+  .streak .count { font-size: 18px; font-weight: 700; color: var(--orange); }
+
+  .main {
+    flex: 1;
+    margin-left: 240px;
+    padding: 32px;
+    max-width: 960px;
+  }
+
+  /* ── Mobile ── */
+  .menu-btn {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 90;
+  }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .menu-btn { display: flex; }
+    .overlay.show { display: block; }
+    .main { margin-left: 0; padding: 60px 16px 24px; }
+  }
+
+  /* ── Section ── */
+  .section { display: none; animation: fadeIn .25s; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .section-desc {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 16px; font-weight: 600; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn.primary:hover { background: var(--accent2); }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  /* ── Progress Bar ── */
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 3px;
+    transition: width .4s;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .stat-card .label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* ── Flashcard ── */
+  .flashcard-container {
+    perspective: 1000px;
+    width: 100%;
+    max-width: 480px;
+    height: 280px;
+    margin: 0 auto 24px;
+    cursor: pointer;
+  }
+  .flashcard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .5s;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, #1e2235, #2a2f4a);
+    border: 1px solid var(--border);
+  }
+  .flashcard-back {
+    background: linear-gradient(135deg, #1a2535, #1e3048);
+    border: 1px solid rgba(108,123,247,.3);
+    transform: rotateY(180deg);
+  }
+  .flashcard-word {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .flashcard-phonetic {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 12px;
+    font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif;
+  }
+  .flashcard-pos {
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(108,123,247,.12);
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .flashcard-meaning {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .flashcard-example {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    max-width: 380px;
+  }
+  .flashcard-example em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 600;
+  }
+  .flashcard-hint {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 12px;
+  }
+  .flashcard-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .flashcard-actions .btn {
+    min-width: 100px;
+    justify-content: center;
+  }
+
+  /* ── Word List ── */
+  .word-list { max-height: 400px; overflow-y: auto; }
+  .word-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    transition: background .15s;
+  }
+  .word-row:hover { background: var(--surface2); }
+  .word-row:last-child { border-bottom: none; }
+  .word-row .en { font-weight: 600; min-width: 140px; }
+  .word-row .cn { color: var(--text2); flex: 1; margin: 0 12px; }
+  .word-row .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .tag-new { background: rgba(108,123,247,.15); color: var(--accent); }
+  .tag-learning { background: rgba(251,191,36,.15); color: var(--orange); }
+  .tag-mastered { background: rgba(52,211,153,.15); color: var(--green); }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all .15s;
+    user-select: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* ── Reading ── */
+  .passage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    line-height: 1.9;
+    font-size: 15px;
+  }
+  .passage p { margin-bottom: 12px; }
+  .question-block { margin-bottom: 20px; }
+  .question-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .15s;
+    line-height: 1.5;
+  }
+  .option:hover { border-color: var(--accent); background: rgba(108,123,247,.05); }
+  .option.selected { border-color: var(--accent); background: rgba(108,123,247,.1); }
+  .option.correct { border-color: var(--green); background: rgba(52,211,153,.1); }
+  .option.wrong { border-color: var(--red); background: rgba(248,113,113,.08); }
+  .option .letter {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--surface2);
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .explanation {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: rgba(108,123,247,.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+  .explanation strong { color: var(--text); }
+
+  /* ── Writing ── */
+  .template-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .template-card:hover { border-color: var(--accent); }
+  .template-card h3 { font-size: 15px; margin-bottom: 8px; }
+  .template-card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .template-expanded {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .template-expanded pre {
+    background: var(--bg);
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-family: inherit;
+  }
+  .highlight { color: var(--accent); font-weight: 600; }
+  .highlight-green { color: var(--green); font-weight: 600; }
+
+  /* ── Translation ── */
+  .translation-input {
+    width: 100%;
+    min-height: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    line-height: 1.7;
+  }
+  .translation-input:focus { outline: none; border-color: var(--accent); }
+  .score-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .score-high { background: rgba(52,211,153,.12); color: var(--green); }
+  .score-mid { background: rgba(251,191,36,.12); color: var(--orange); }
+  .score-low { background: rgba(248,113,113,.12); color: var(--red); }
+
+  /* ── Listening ── */
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .play-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+    flex-shrink: 0;
+  }
+  .play-btn:hover { background: var(--accent2); }
+  .audio-info { flex: 1; }
+  .audio-title { font-size: 14px; font-weight: 600; }
+  .audio-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .speed-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .speed-btn.active { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Grammar ── */
+  .grammar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .grammar-card h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .grammar-card .rule {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .grammar-card .example {
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .grammar-card .example em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .grammar-card .example .wrong-ex { color: var(--red); text-decoration: line-through; }
+
+  /* ── Review / Settings ── */
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 14px; }
+  .setting-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  select, input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  select:focus, input:focus { outline: none; border-color: var(--accent); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Tooltip ── */
+  .tooltip {
+    position: relative;
+  }
+  .tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s;
+  }
+  .tooltip:hover::after { opacity: 1; }
+
+  /* ── Empty State ── */
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text2);
+  }
+  .empty .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* ── Today Plan ── */
+  .plan-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .plan-item:hover { border-color: var(--accent); }
+  .plan-item .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: all .2s;
+  }
+  .plan-item.done .check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .plan-item.done .plan-text { text-decoration: line-through; color: var(--text2); }
+  .plan-text { font-size: 14px; }
+  .plan-time {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>📘 CET-6 备考</h1>
+      <p>六级英语学习助手</p>
+    </div>
+    <div class="nav-item active" data-section="dashboard" onclick="switchSection('dashboard')">
+      <span class="icon">📊</span> 学习概览
+    </div>
+    <div class="nav-item" data-section="vocabulary" onclick="switchSection('vocabulary')">
+      <span class="icon">📝</span> 词汇
+      <span class="badge" id="vocab-badge">0</span>
+    </div>
+    <div class="nav-item" data-section="reading" onclick="switchSection('reading')">
+      <span class="icon">📖</span> 阅读
+    </div>
+    <div class="nav-item" data-section="listening" onclick="switchSection('listening')">
+      <span class="icon">🎧</span> 听力
+    </div>
+    <div class="nav-item" data-section="writing" onclick="switchSection('writing')">
+      <span class="icon">✍️</span> 写作
+    </div>
+    <div class="nav-item" data-section="translation" onclick="switchSection('translation')">
+      <span class="icon">🔤</span> 翻译
+    </div>
+    <div class="nav-item" data-section="grammar" onclick="switchSection('grammar')">
+      <span class="icon">📐</span> 语法
+    </div>
+    <div class="sidebar-footer">
+      <div class="streak">
+        <span class="fire">🔥</span>
+        <span class="count" id="streak-count">0</span>
+        <span>天连续学习</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main">
+
+    <!-- Dashboard -->
+    <div class="section active" id="sec-dashboard">
+      <h2 class="section-title">学习概览</h2>
+      <p class="section-desc">坚持每天学习，六级一定过！</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="stat-words">0</div>
+          <div class="label">已学词汇</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="stat-mastered">0</div>
+          <div class="label">已掌握</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="stat-passages">0</div>
+          <div class="label">阅读完成</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="stat-streak">0</div>
+          <div class="label">连续天数</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 今日计划</span>
+          <button class="btn sm" onclick="resetPlan()">重置</button>
+        </div>
+        <div id="today-plan"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📈 词汇进度</span>
+        </div>
+        <div class="progress-bar"><div class="fill" id="vocab-progress" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:4px;">
+          <span id="vocab-current">0 / 500</span>
+          <span>目标: 500 核心词汇</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vocabulary -->
+    <div class="section" id="sec-vocabulary">
+      <h2 class="section-title">词汇学习</h2>
+      <p class="section-desc">六级高频核心词汇，点击卡片翻转查看释义</p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchVocabTab('flashcard')">闪卡</div>
+        <div class="tab" onclick="switchVocabTab('list')">词汇表</div>
+        <div class="tab" onclick="switchVocabTab('quiz')">测试</div>
+      </div>
+
+      <!-- Flashcard Mode -->
+      <div id="vocab-flashcard">
+        <div class="flashcard-container" onclick="flipCard()">
+          <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+              <div class="flashcard-word" id="fc-word">elaborate</div>
+              <div class="flashcard-phonetic" id="fc-phonetic">/ɪˈlæbərət/</div>
+              <div class="flashcard-pos" id="fc-pos">adj. / v.</div>
+              <div class="flashcard-hint">点击翻转查看释义</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <div class="flashcard-meaning" id="fc-meaning">精心制作的；详尽阐述</div>
+              <div class="flashcard-example" id="fc-example">
+                Could you <em>elaborate</em> on your proposal?<br>
+                你能详细阐述一下你的提案吗？
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard-actions">
+          <button class="btn" onclick="markWord('不认识')">❌ 不认识</button>
+          <button class="btn" onclick="markWord('模糊')">🤔 模糊</button>
+          <button class="btn primary" onclick="markWord('认识')">✅ 认识</button>
+          <button class="btn" onclick="nextWord()">➡️ 下一个</button>
+        </div>
+        <div style="text-align:center;font-size:13px;color:var(--text2);">
+          <span id="fc-index">1</span> / <span id="fc-total">0</span>
+          &nbsp;&nbsp;|&nbsp;&nbsp;
+          <span id="fc-status" class="tag tag-new">新词</span>
+        </div>
+      </div>
+
+      <!-- List Mode -->
+      <div id="vocab-list" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <input type="text" id="word-search" placeholder="搜索单词..." style="flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;font-family:inherit;" oninput="filterWords()">
+          <select id="word-filter" onchange="filterWords()" style="padding:8px 12px;">
+            <option value="all">全部</option>
+            <option value="new">新词</option>
+            <option value="learning">学习中</option>
+            <option value="mastered">已掌握</option>
+          </select>
+        </div>
+        <div class="word-list" id="word-list-container"></div>
+      </div>
+
+      <!-- Quiz Mode -->
+      <div id="vocab-quiz" style="display:none">
+        <div class="card" id="quiz-card">
+          <div class="card-header">
+            <span class="card-title">词汇测试</span>
+            <span id="quiz-score" style="font-size:13px;color:var(--text2);">正确: 0 / 0</span>
+          </div>
+          <div class="question-text" id="quiz-question" style="font-size:20px;font-weight:700;margin-bottom:16px;text-align:center;padding:20px 0;"></div>
+          <div id="quiz-options"></div>
+          <div style="text-align:center;margin-top:16px;">
+            <button class="btn primary" id="quiz-next" onclick="nextQuiz()" style="display:none;">下一题</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading -->
+    <div class="section" id="sec-reading">
+      <h2 class="section-title">阅读理解</h2>
+      <p class="section-desc">六级真题风格阅读训练，提升理解与答题能力</p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchReadTab(0)">仔细阅读</div>
+        <div class="tab" onclick="switchReadTab(1)">长篇阅读</div>
+        <div class="tab" onclick="switchReadTab(2)">选词填空</div>
+      </div>
+
+      <div id="reading-content"></div>
+    </div>
+
+    <!-- Listening -->
+    <div class="section" id="sec-listening">
+      <h2 class="section-title">听力训练</h2>
+      <p class="section-desc">六级听力技巧与模拟训练</p>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">🎯 听力应试技巧</div>
+        <div style="display:grid;gap:12px;">
+          <div style="padding:12px;background:var(--bg);border-radius:8px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">1. 预读选项（最关键）</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+              利用播放 Direction 的时间快速浏览选项，划出关键词（名词、动词、数字）。通过选项推测问题类型和对话主题。选项中的重复词往往是对话主题。
+            </div>
+          </div>
+          <div style="padding:12px;background:var(--bg);border-radius:8px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">2. 听到什么不选什么</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+              六级听力大量考查同义替换。选项中与原文完全一致的词往往是干扰项，正确答案通常是原文的同义改写。
+            </div>
+          </div>
+          <div style="padding:12px;background:var(--bg);border-radius:8px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">3. 注意转折与强调</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+              but / however / actually / in fact / the point is 后面的内容是高频考点。语气变化（重读、停顿）也是重要信号。
+            </div>
+          </div>
+          <div style="padding:12px;background:var(--bg);border-radius:8px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">4. 讲座/演讲题型策略</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+              注意开头的主题句和结尾的总结。举例处（for example / take...for instance）常出题。注意序数词（first, second）提示的结构。
+            </div>
+          </div>
+          <div style="padding:12px;background:var(--bg);border-radius:8px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">5. 高频场景词汇</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+              <strong>校园：</strong>seminar, assignment, deadline, tuition, scholarship, dormitory<br>
+              <strong>工作：</strong>resume, promotion, overtime, negotiate, qualification<br>
+              <strong>健康：</strong>symptom, prescription, therapy, allergy, surgery<br>
+              <strong>商务：</strong>quarterly, revenue, merger, acquisition, logistics
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">📋 听力题型分布</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+          <div style="padding:14px;background:var(--bg);border-radius:8px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:var(--accent);">8%</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px;">长对话 × 2</div>
+            <div style="font-size:11px;color:var(--text2);">每题 1 分</div>
+          </div>
+          <div style="padding:14px;background:var(--bg);border-radius:8px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:var(--accent);">8%</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px;">听力篇章 × 3</div>
+            <div style="font-size:11px;color:var(--text2);">每题 1 分</div>
+          </div>
+          <div style="padding:14px;background:var(--bg);border-radius:8px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:var(--green);">20%</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px;">讲座/讲话 × 7</div>
+            <div style="font-size:11px;color:var(--text2);">每题 2 分</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">🎙️ 精听练习素材</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:16px;">
+          推荐使用以下资源进行精听训练（每天 30 分钟）：
+        </p>
+        <div style="display:grid;gap:8px;">
+          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
+            📻 <strong>BBC 6 Minute English</strong> — 6 分钟一期，语速适中，有文本
+          </div>
+          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
+            📻 <strong>VOA Standard English</strong> — 标准美音，话题广泛
+          </div>
+          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
+            📻 <strong>TED-Ed</strong> — 5 分钟动画讲解，适合精听+跟读
+          </div>
+          <div style="padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13px;">
+            📻 <strong>六级真题音频</strong> — 反复精听历年真题，最接近考试
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Writing -->
+    <div class="section" id="sec-writing">
+      <h2 class="section-title">写作模板</h2>
+      <p class="section-desc">六级写作高分模板与句型，考前必背</p>
+
+      <div id="writing-content"></div>
+    </div>
+
+    <!-- Translation -->
+    <div class="section" id="sec-translation">
+      <h2 class="section-title">翻译训练</h2>
+      <p class="section-desc">中国文化/社会/经济主题翻译练习</p>
+
+      <div id="translation-content"></div>
+    </div>
+
+    <!-- Grammar -->
+    <div class="section" id="sec-grammar">
+      <h2 class="section-title">语法要点</h2>
+      <p class="section-desc">六级高频语法知识点，阅读写作必备</p>
+
+      <div id="grammar-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+
+const VOCAB = [
+  {word:"elaborate",phonetic:"/ɪˈlæbərət/",pos:"adj. / v.",meaning:"精心制作的；详尽阐述",example:"Could you <em>elaborate</em> on your proposal?",trans:"你能详细阐述一下你的提案吗？"},
+  {word:"contemplate",phonetic:"/ˈkɒntəmpleɪt/",pos:"v.",meaning:"沉思；考虑；注视",example:"She sat by the window, <em>contemplating</em> the meaning of life.",trans:"她坐在窗边，思考人生的意义。"},
+  {word:"deteriorate",phonetic:"/dɪˈtɪəriəreɪt/",pos:"v.",meaning:"恶化；变质",example:"His health continued to <em>deteriorate</em> despite treatment.",trans:"尽管接受了治疗，他的健康状况仍在恶化。"},
+  {word:"unprecedented",phonetic:"/ʌnˈpresɪdentɪd/",pos:"adj.",meaning:"前所未有的；空前的",example:"The pandemic brought <em>unprecedented</em> challenges.",trans:"疫情带来了前所未有的挑战。"},
+  {word:"scrutiny",phonetic:"/ˈskruːtəni/",pos:"n.",meaning:"仔细审查；详细检查",example:"The proposal came under intense <em>scrutiny</em>.",trans:"该提案受到了严格审查。"},
+  {word:"substantial",phonetic:"/səbˈstænʃəl/",pos:"adj.",meaning:"大量的；实质的；坚固的",example:"There has been a <em>substantial</em> increase in demand.",trans:"需求有了大幅增长。"},
+  {word:"implicit",phonetic:"/ɪmˈplɪsɪt/",pos:"adj.",meaning:"含蓄的；暗示的；无疑问的",example:"There was an <em>implicit</em> criticism in his remarks.",trans:"他的话中暗含批评。"},
+  {word:"versatile",phonetic:"/ˈvɜːsətaɪl/",pos:"adj.",meaning:"多才多艺的；多功能的",example:"She is a <em>versatile</em> actress who can play any role.",trans:"她是一位能胜任任何角色的多才多艺的演员。"},
+  {word:"compatible",phonetic:"/kəmˈpætəbl/",pos:"adj.",meaning:"兼容的；可共存的",example:"The software is <em>compatible</em> with most operating systems.",trans:"该软件与大多数操作系统兼容。"},
+  {word:"preliminary",phonetic:"/prɪˈlɪmɪnəri/",pos:"adj. / n.",meaning:"初步的；预备的",example:"<em>Preliminary</em> results show the experiment is a success.",trans:"初步结果显示实验是成功的。"},
+  {word:"simultaneous",phonetic:"/ˌsɪmlˈteɪniəs/",pos:"adj.",meaning:"同时发生的",example:"The event was broadcast in <em>simultaneous</em> translation.",trans:"该活动以同声传译的方式播出。"},
+  {word:"authentic",phonetic:"/ɔːˈθentɪk/",pos:"adj.",meaning:"真实的；正宗的；可信的",example:"The restaurant serves <em>authentic</em> Italian cuisine.",trans:"这家餐厅提供正宗的意大利菜。"},
+  {word:"controversy",phonetic:"/ˈkɒntrəvɜːsi/",pos:"n.",meaning:"争论；争议",example:"The decision sparked a heated <em>controversy</em>.",trans:"该决定引发了激烈的争议。"},
+  {word:"vulnerable",phonetic:"/ˈvʌlnərəbl/",pos:"adj.",meaning:"易受伤害的；脆弱的",example:"Children are especially <em>vulnerable</em> to pollution.",trans:"儿童特别容易受到污染的伤害。"},
+  {word:"ambiguous",phonetic:"/æmˈbɪɡjuəs/",pos:"adj.",meaning:"模棱两可的；含糊的",example:"The statement was deliberately <em>ambiguous</em>.",trans:"该声明故意含糊其辞。"},
+  {word:"allocate",phonetic:"/ˈæləkeɪt/",pos:"v.",meaning:"分配；拨出",example:"The government will <em>allocate</em> more funds to education.",trans:"政府将拨出更多资金用于教育。"},
+  {word:"compulsory",phonetic:"/kəmˈpʌlsəri/",pos:"adj.",meaning:"义务的；强制的",example:"Education is <em>compulsory</em> for children aged 6 to 15.",trans:"6 至 15 岁的儿童必须接受义务教育。"},
+  {word:"diminish",phonetic:"/dɪˈmɪnɪʃ/",pos:"v.",meaning:"减少；缩小；贬低",example:"His influence has <em>diminished</em> over the years.",trans:"这些年来他的影响力已经减弱了。"},
+  {word:"formidable",phonetic:"/ˈfɔːmɪdəbl/",pos:"adj.",meaning:"令人敬畏的；强大的",example:"She is a <em>formidable</em> opponent in any debate.",trans:"在任何辩论中她都是一个令人敬畏的对手。"},
+  {word:"inherent",phonetic:"/ɪnˈhɪərənt/",pos:"adj.",meaning:"固有的；内在的",example:"There are <em>inherent</em> risks in any investment.",trans:"任何投资都有固有的风险。"},
+  {word:"legitimate",phonetic:"/lɪˈdʒɪtɪmət/",pos:"adj.",meaning:"合法的；正当的",example:"They have a <em>legitimate</em> claim to the property.",trans:"他们对该财产有合法的权利主张。"},
+  {word:"manifest",phonetic:"/ˈmænɪfest/",pos:"v. / adj.",meaning:"显示；表明；明显的",example:"The symptoms <em>manifested</em> themselves within days.",trans:"症状在几天内就显现出来了。"},
+  {word:"obsolete",phonetic:"/ˌɒbsəˈliːt/",pos:"adj.",meaning:"过时的；淘汰的",example:"The technology has become <em>obsolete</em>.",trans:"这项技术已经过时了。"},
+  {word:"paradox",phonetic:"/ˈpærədɒks/",pos:"n.",meaning:"悖论；矛盾的事物",example:"It's a <em>paradox</em> that the richest country has poor people.",trans:"最富有的国家也有穷人，这是一个悖论。"},
+  {word:"prevalent",phonetic:"/ˈprevələnt/",pos:"adj.",meaning:"流行的；普遍的",example:"Obesity is increasingly <em>prevalent</em> among young people.",trans:"肥胖在年轻人中越来越普遍。"},
+  {word:"resilient",phonetic:"/rɪˈzɪliənt/",pos:"adj.",meaning:"有弹性的；恢复力强的",example:"Children are often more <em>resilient</em> than adults think.",trans:"儿童往往比大人想象的更有韧性。"},
+  {word:"skeptical",phonetic:"/ˈskeptɪkəl/",pos:"adj.",meaning:"怀疑的；多疑的",example:"Many scientists remain <em>skeptical</em> about the claim.",trans:"许多科学家对该说法仍持怀疑态度。"},
+  {word:"spontaneous",phonetic:"/spɒnˈteɪniəs/",pos:"adj.",meaning:"自发的；自然的",example:"The crowd broke into <em>spontaneous</em> applause.",trans:"人群自发地鼓起掌来。"},
+  {word:"undermine",phonetic:"/ˌʌndəˈmaɪn/",pos:"v.",meaning:"破坏；逐渐削弱",example:"Constant criticism will <em>undermine</em> her confidence.",trans:"不断的批评会削弱她的信心。"},
+  {word:"advocate",phonetic:"/ˈædvəkeɪt/",pos:"v. / n.",meaning:"提倡；拥护者",example:"She <em>advocates</em> for equal pay for women.",trans:"她提倡男女同工同酬。"},
+  {word:"comprehensive",phonetic:"/ˌkɒmprɪˈhensɪv/",pos:"adj.",meaning:"全面的；综合的",example:"We need a <em>comprehensive</em> plan to address climate change.",trans:"我们需要一个应对气候变化的综合方案。"},
+  {word:"cumulative",phonetic:"/ˈkjuːmjələtɪv/",pos:"adj.",meaning:"累积的；渐增的",example:"The <em>cumulative</em> effect of pollution is devastating.",trans:"污染的累积效应是毁灭性的。"},
+  {word:"drastic",phonetic:"/ˈdræstɪk/",pos:"adj.",meaning:"激烈的；严厉的",example:"<em>Drastic</em> measures are needed to reduce emissions.",trans:"需要采取严厉措施来减少排放。"},
+  {word:"feasible",phonetic:"/ˈfiːzəbl/",pos:"adj.",meaning:"可行的；可能的",example:"Is it <em>feasible</em> to finish the project by December?",trans:"在十二月前完成这个项目可行吗？"},
+  {word:"hierarchy",phonetic:"/ˈhaɪərɑːki/",pos:"n.",meaning:"等级制度；层次结构",example:"The company has a strict <em>hierarchy</em>.",trans:"公司有严格的等级制度。"},
+  {word:"imminent",phonetic:"/ˈɪmɪnənt/",pos:"adj.",meaning:"即将发生的；迫近的",example:"A storm is <em>imminent</em> — take shelter now.",trans:"暴风雨即将来临——快找地方躲避。"},
+  {word:"lucrative",phonetic:"/ˈluːkrətɪv/",pos:"adj.",meaning:"利润丰厚的",example:"Tech startups can be extremely <em>lucrative</em>.",trans:"科技创业公司可以极其赚钱。"},
+  {word:"meticulous",phonetic:"/mɪˈtɪkjələs/",pos:"adj.",meaning:"一丝不苟的；细致的",example:"She is <em>meticulous</em> about her research.",trans:"她对研究一丝不苟。"},
+  {word:"nurture",phonetic:"/ˈnɜːtʃə(r)/",pos:"v. / n.",meaning:"培养；养育",example:"We must <em>nurture</em> the next generation of scientists.",trans:"我们必须培养下一代科学家。"},
+  {word:"optimal",phonetic:"/ˈɒptɪməl/",pos:"adj.",meaning:"最佳的；最优的",example:"What is the <em>optimal</em> temperature for this reaction?",trans:"这个反应的最佳温度是多少？"},
+  {word:"perpetual",phonetic:"/pəˈpetʃuəl/",pos:"adj.",meaning:"永久的；不断的",example:"He lives in <em>perpetual</em> fear of being fired.",trans:"他一直生活在被解雇的恐惧中。"},
+  {word:"radical",phonetic:"/ˈrædɪkəl/",pos:"adj. / n.",meaning:"根本的；激进的",example:"The company needs <em>radical</em> reform.",trans:"公司需要彻底的改革。"},
+  {word:"rigid",phonetic:"/ˈrɪdʒɪd/",pos:"adj.",meaning:"严格的；僵硬的",example:"The schedule is too <em>rigid</em> to allow any changes.",trans:"日程安排太死板，不允许任何更改。"},
+  {word:"surge",phonetic:"/sɜːdʒ/",pos:"v. / n.",meaning:"激增；涌动",example:"There has been a <em>surge</em> in online shopping.",trans:"网上购物出现了激增。"},
+  {word:"testimony",phonetic:"/ˈtestɪməni/",pos:"n.",meaning:"证词；证据",example:"Her success is a <em>testimony</em> to hard work.",trans:"她的成功是勤奋的证明。"},
+  {word:"viable",phonetic:"/ˈvaɪəbl/",pos:"adj.",meaning:"可行的；能生存的",example:"Solar energy is now a <em>viable</em> alternative.",trans:"太阳能现在是一种可行的替代方案。"},
+  {word:"warrant",phonetic:"/ˈwɒrənt/",pos:"v. / n.",meaning:"保证；授权；正当理由",example:"The situation <em>warrants</em> immediate attention.",trans:"这种情况需要立即关注。"},
+  {word:"yield",phonetic:"/jiːld/",pos:"v. / n.",meaning:"产出；屈服；收益",example:"The investment <em>yielded</em> a 15% return.",trans:"该投资产生了 15% 的回报。"},
+  {word:"accommodate",phonetic:"/əˈkɒmədeɪt/",pos:"v.",meaning:"容纳；适应；提供住宿",example:"The hotel can <em>accommodate</em> up to 500 guests.",trans:"该酒店可容纳多达 500 名客人。"},
+  {word:"aggregate",phonetic:"/ˈæɡrɪɡət/",pos:"adj. / v. / n.",meaning:"总计的；聚集",example:"The <em>aggregate</em> score was 3-1.",trans:"总比分是 3 比 1。"},
+];
+
+const READINGS = [
+  // 仔细阅读
+  {
+    title: "仔细阅读 — Passage 1",
+    passage: `<p>Artificial intelligence is rapidly transforming the healthcare industry. From diagnosing diseases to predicting patient outcomes, AI-powered tools are becoming indispensable in modern medicine. A recent study published in Nature Medicine found that an AI system could detect breast cancer in mammograms with greater accuracy than human radiologists, reducing both false positives and false negatives.</p>
+<p>However, the integration of AI in healthcare raises significant ethical concerns. One major issue is algorithmic bias. If AI systems are trained primarily on data from certain demographic groups, they may perform poorly for underrepresented populations. For instance, dermatology AI tools trained mostly on lighter skin tones have shown lower accuracy rates for patients with darker skin.</p>
+<p>Another challenge is the "black box" problem. Many deep learning models cannot explain their reasoning in terms that doctors or patients can understand. This lack of transparency makes it difficult for physicians to trust AI recommendations, especially in life-or-death situations. Regulatory bodies are now requiring that AI systems used in clinical settings provide some degree of explainability.</p>
+<p>Despite these challenges, proponents argue that AI has the potential to democratize healthcare by bringing expert-level diagnostics to underserved regions where specialists are scarce. The key lies in developing AI systems that are not only accurate but also fair, transparent, and accountable.</p>`,
+    questions: [
+      {
+        q: "What did the study published in Nature Medicine find?",
+        options: [
+          "AI will replace radiologists within five years",
+          "AI detected breast cancer more accurately than human radiologists",
+          "Mammograms are no longer necessary with AI",
+          "Human radiologists are more reliable than AI"
+        ],
+        answer: 1,
+        explain: "文章第一段明确提到 'an AI system could detect breast cancer in mammograms with greater accuracy than human radiologists'，即 AI 在乳腺癌检测方面比人类放射科医生更准确。"
+      },
+      {
+        q: "What is the 'black box' problem in AI healthcare?",
+        options: [
+          "AI systems are too expensive for most hospitals",
+          "AI hardware frequently malfunctions in clinical settings",
+          "AI models cannot explain their reasoning in understandable terms",
+          "Patient data is stored in inaccessible formats"
+        ],
+        answer: 2,
+        explain: "第二段解释了 black box 问题：'Many deep learning models cannot explain their reasoning in terms that doctors or patients can understand.' 即深度学习模型无法用医生或患者能理解的方式解释其推理过程。"
+      },
+      {
+        q: "Why is algorithmic bias a concern in healthcare AI?",
+        options: [
+          "AI systems are too slow to process diverse data",
+          "Training data from certain groups may cause poor performance for others",
+          "Biased algorithms cost more to develop",
+          "Patients prefer human doctors over biased machines"
+        ],
+        answer: 1,
+        explain: "文章指出 'If AI systems are trained primarily on data from certain demographic groups, they may perform poorly for underrepresented populations'，即训练数据的偏向性会导致对代表性不足群体的表现不佳。"
+      },
+      {
+        q: "How might AI democratize healthcare according to proponents?",
+        options: [
+          "By making all medical services free of charge",
+          "By replacing all human doctors with machines",
+          "By bringing expert diagnostics to underserved regions",
+          "By eliminating the need for medical training"
+        ],
+        answer: 2,
+        explain: "最后一段指出 'AI has the potential to democratize healthcare by bringing expert-level diagnostics to underserved regions where specialists are scarce.'"
+      }
+    ]
+  },
+  {
+    title: "仔细阅读 — Passage 2",
+    passage: `<p>The concept of a four-day workweek has gained considerable traction in recent years, fueled by pilot programs across Europe, North America, and Asia. Advocates argue that reducing work hours leads to higher productivity, better mental health, and improved work-life balance. A landmark trial in Iceland involving over 2,500 workers found that productivity remained the same or improved in most workplaces, while employee well-being increased dramatically.</p>
+<p>Critics, however, point out that a four-day workweek is not universally applicable. Industries that require continuous operations — such as healthcare, manufacturing, and emergency services — cannot simply reduce their operating days without consequences. Moreover, some employers worry that compressed workweeks may lead to longer daily hours, potentially increasing burnout rather than reducing it.</p>
+<p>The debate also intersects with broader questions about the nature of work in the 21st century. As automation and AI handle more routine tasks, some economists argue that the traditional 40-hour workweek is an outdated relic of the industrial age. They propose that knowledge workers, in particular, could accomplish the same output in fewer hours if meetings were reduced and deep work was prioritized.</p>
+<p>What seems clear is that the one-size-fits-all approach to work scheduling is becoming obsolete. The future of work likely involves greater flexibility, with different arrangements suited to different industries, roles, and individual preferences.</p>`,
+    questions: [
+      {
+        q: "What was the result of the Iceland pilot program?",
+        options: [
+          "Productivity dropped significantly",
+          "Most companies returned to five-day weeks",
+          "Productivity stayed the same or improved, well-being increased",
+          "Workers preferred longer daily hours"
+        ],
+        answer: 2,
+        explain: "文章明确提到 'productivity remained the same or improved in most workplaces, while employee well-being increased dramatically'。"
+      },
+      {
+        q: "Which industries face challenges with a four-day workweek?",
+        options: [
+          "Technology and consulting",
+          "Healthcare, manufacturing, and emergency services",
+          "Education and retail",
+          "Finance and marketing"
+        ],
+        answer: 1,
+        explain: "文章指出 'Industries that require continuous operations — such as healthcare, manufacturing, and emergency services — cannot simply reduce their operating days'。"
+      }
+    ]
+  },
+  // 长篇阅读
+  {
+    title: "长篇阅读 — 段落匹配",
+    passage: `<p><strong>A.</strong> The gig economy — characterized by short-term contracts and freelance work rather than permanent jobs — has expanded dramatically in the past decade. Platforms like Uber, DoorDash, and Upwork have created new opportunities for millions of workers worldwide.</p>
+<p><strong>B.</strong> For many workers, the appeal of gig work lies in its flexibility. Parents, students, and semi-retired individuals can set their own schedules and choose when and how much they work. This autonomy is particularly valuable for those who cannot commit to traditional 9-to-5 employment.</p>
+<p><strong>C.</strong> However, this flexibility comes at a significant cost. Gig workers typically lack access to employer-sponsored health insurance, retirement plans, paid leave, and unemployment benefits. A study by the Pew Research Center found that 58% of gig workers would prefer traditional employment if it were available to them.</p>
+<p><strong>D.</strong> The legal status of gig workers remains contentious. Companies classify them as independent contractors, avoiding the obligations that come with employing full-time staff. Labor advocates argue this misclassification exploits workers and allows companies to externalize the costs of doing business onto individuals.</p>
+<p><strong>E.</strong> Several countries have begun to address these issues through legislation. California's AB5 law attempted to reclassify many gig workers as employees, though it was partially overturned by Proposition 22. The European Union has proposed a directive that would presume platform workers are employees unless companies can prove otherwise.</p>
+<p><strong>F.</strong> Technology itself may offer some solutions. Portable benefits systems — where benefits are tied to the worker rather than the employer — could provide a safety net for gig workers. Some platforms have begun offering limited benefits to their most active workers, though critics say these measures are inadequate.</p>
+<p><strong>G.</strong> The COVID-19 pandemic highlighted both the essential nature and the vulnerability of gig workers. Delivery drivers and ride-share operators were deemed essential workers, yet many lacked access to sick leave or personal protective equipment. This contradiction intensified calls for reform.</p>`,
+    questions: [
+      {
+        q: "Which paragraph discusses the main attraction of gig work for certain groups?",
+        options: ["A","B","C","D","E","F","G"],
+        answer: 1,
+        explain: "段落 B 讨论了零工工作的主要吸引力——灵活性，特别提到了家长、学生和半退休人员。"
+      },
+      {
+        q: "Which paragraph mentions legislative efforts to protect gig workers?",
+        options: ["A","B","C","D","E","F","G"],
+        answer: 4,
+        explain: "段落 E 讨论了多个国家通过立法来解决零工工人权益问题。"
+      },
+      {
+        q: "Which paragraph reveals that most gig workers actually prefer traditional employment?",
+        options: ["A","B","C","D","E","F","G"],
+        answer: 2,
+        explain: "段落 C 提到 Pew Research Center 的研究发现 58% 的零工工人更喜欢传统就业。"
+      }
+    ]
+  },
+  // 选词填空
+  {
+    title: "选词填空 — Banked Cloze",
+    passage: `<p>Climate change is one of the most <strong>___(1)___</strong> challenges facing humanity today. Rising global temperatures have led to more frequent and <strong>___(2)___</strong> weather events, from devastating hurricanes to prolonged droughts. Scientists warn that without <strong>___(3)___</strong> action, the consequences could be catastrophic.</p>
+<p>Renewable energy sources such as solar and wind power have <strong>___(4)___</strong> significantly in recent years, offering hope for a transition away from fossil fuels. However, the pace of this transition remains <strong>___(5)___</strong> relative to the urgency of the crisis. Many developing nations argue that they should not bear the <strong>___(6)___</strong> burden of cutting emissions, as industrialized countries are historically responsible for the majority of greenhouse gases.</p>
+<p>Individual actions, while important, are <strong>___(7)___</strong> to address the scale of the problem. Systemic changes in energy policy, transportation, and industrial practices are <strong>___(8)___</strong>. The Paris Agreement of 2015 set ambitious targets, but compliance has been <strong>___(9)___</strong>, with many nations falling short of their commitments. Ultimately, addressing climate change requires a <strong>___(10)___</strong> effort involving governments, corporations, and citizens worldwide.</p>
+<p style="margin-top:16px;color:var(--text2);font-size:13px;">
+<strong>Word Bank:</strong> severe, essential, insufficient, formidable, advanced, disproportionate, collective, immediate, uneven, inevitable
+</p>`,
+    answers: [
+      {blank: 1, word: "formidable", meaning: "艰巨的"},
+      {blank: 2, word: "severe", meaning: "严重的"},
+      {blank: 3, word: "immediate", meaning: "立即的"},
+      {blank: 4, word: "advanced", meaning: "进步了"},
+      {blank: 5, word: "uneven", meaning: "不均衡的"},
+      {blank: 6, word: "disproportionate", meaning: "不成比例的"},
+      {blank: 7, word: "insufficient", meaning: "不足的"},
+      {blank: 8, word: "essential", meaning: "必要的"},
+      {blank: 9, word: "uneven", meaning: "参差不齐的"},
+      {blank: 10, word: "collective", meaning: "集体的"}
+    ]
+  }
+];
+
+const WRITING_TEMPLATES = [
+  {
+    title: "议论文 — 观点对比型",
+    desc: "适用于 'Some people think... while others believe...' 类型的题目",
+    content: `<strong>第一段：引出话题 + 表明立场</strong>
+<span class="highlight">In recent years, the issue of</span> [话题] <span class="highlight">has sparked a heated debate. Some people hold the view that</span> [观点A], <span class="highlight">while others argue that</span> [观点B]. <span class="highlight">From my perspective, I am inclined to agree with the latter/former view.</span>
+
+<strong>第二段：正方论据</strong>
+<span class="highlight">Those who support</span> [观点A] <span class="highlight">have their own reasons. To begin with,</span> [论据1]. <span class="highlight">For instance,</span> [举例]. <span class="highlight">Moreover,</span> [论据2].
+
+<strong>第三段：反方论据 + 我的观点</strong>
+<span class="highlight">However, opponents of this view contend that</span> [反方论据]. <span class="highlight">In addition,</span> [补充论据]. <span class="highlight">Personally, I believe</span> [你的立场和理由].
+
+<strong>第四段：总结</strong>
+<span class="highlight">In conclusion, although</span> [承认另一方有道理], <span class="highlight">I still maintain that</span> [重申立场]. <span class="highlight">Only in this way can we</span> [升华].`
+  },
+  {
+    title: "问题解决型",
+    desc: "适用于 'What are the problems and how to solve them?' 类型",
+    content: `<strong>第一段：描述现象/问题</strong>
+<span class="highlight">With the rapid development of</span> [领域], [问题] <span class="highlight">has become increasingly prevalent/serious. This issue has raised widespread concern among the public.</span>
+
+<strong>第二段：分析原因</strong>
+<span class="highlight">Several factors contribute to this phenomenon. First and foremost,</span> [原因1]. <span class="highlight">Additionally,</span> [原因2]. <span class="highlight">Last but not least,</span> [原因3].
+
+<strong>第三段：提出解决方案</strong>
+<span class="highlight">To address this problem, effective measures should be taken. For one thing,</span> [方案1]. <span class="highlight">For another,</span> [方案2]. <span class="highlight">Furthermore,</span> [方案3].
+
+<strong>第四段：总结展望</strong>
+<span class="highlight">In a word, only through the joint efforts of</span> [各方] <span class="highlight">can we effectively tackle this problem. It is high time that we took immediate action.</span>`
+  },
+  {
+    title: "图表描述型",
+    desc: "适用于图表作文，描述数据趋势并分析原因",
+    content: `<strong>第一段：描述图表总体趋势</strong>
+<span class="highlight">As is clearly illustrated in the chart/graph,</span> [总体趋势描述]. <span class="highlight">Specifically,</span> [具体数据].
+
+<strong>第二段：分析原因</strong>
+<span class="highlight">There are several possible reasons accounting for this trend. In the first place,</span> [原因1]. <span class="highlight">In the second place,</span> [原因2]. <span class="highlight">What's more,</span> [原因3].
+
+<strong>第三段：给出建议/预测趋势</strong>
+<span class="highlight">Given the analysis above, it is reasonable to predict that</span> [趋势预测]. <span class="highlight">Accordingly, it is imperative that</span> [建议].
+
+<strong>万能数据描述句型：</strong>
+• <span class="highlight-green">The number of ... increased/decreased dramatically from ... to ...</span>
+• <span class="highlight-green">... accounted for the largest proportion, at ...%</span>
+• <span class="highlight-green">Compared with ..., the figure for ... was significantly higher/lower</span>
+• <span class="highlight-green">It is worth noting that ... experienced a sharp rise/fall</span>`
+  },
+  {
+    title: "书信/通知型",
+    desc: "适用于建议信、投诉信、邀请信、通知等应用文",
+    content: `<strong>建议信开头：</strong>
+<span class="highlight">I am writing to express my views concerning</span> [话题]. <span class="highlight">I would like to offer several suggestions for your consideration.</span>
+
+<strong>建议信正文：</strong>
+<span class="highlight">Firstly, I would suggest that</span> [建议1]. <span class="highlight">Secondly, it would be beneficial if</span> [建议2]. <span class="highlight">Last but not least,</span> [建议3].
+
+<strong>邀请信开头：</strong>
+<span class="highlight">I am writing to cordially invite you to</span> [活动]. <span class="highlight">The event is scheduled to take place on</span> [日期] <span class="highlight">at</span> [地点].
+
+<strong>投诉信开头：</strong>
+<span class="highlight">I am writing to express my dissatisfaction with</span> [产品/服务]. <span class="highlight">The details are as follows.</span>
+
+<strong>结尾通用：</strong>
+<span class="highlight">I sincerely hope that you will take my suggestions into consideration. Your prompt attention to this matter would be greatly appreciated.</span>
+<span class="highlight">I am looking forward to your favorable reply at your earliest convenience.</span>`
+  },
+  {
+    title: "高分替换词组",
+    desc: "写作中替换低级词汇，提升文章档次",
+    content: `<strong>表示「重要」：</strong>
+important → <span class="highlight">crucial / vital / essential / indispensable / of great significance</span>
+
+<strong>表示「很多」：</strong>
+many → <span class="highlight">numerous / a multitude of / an array of / a growing number of</span>
+
+<strong>表示「认为」：</strong>
+think → <span class="highlight">maintain / contend / hold the view that / be convinced that</span>
+
+<strong>表示「因为」：</strong>
+because → <span class="highlight">on account of / owing to / due to / as a consequence of</span>
+
+<strong>表示「因此」：</strong>
+so → <span class="highlight">consequently / as a result / accordingly / hence / thus</span>
+
+<strong>表示「但是」：</strong>
+but → <span class="highlight">nevertheless / nonetheless / whereas / conversely / on the contrary</span>
+
+<strong>表示「越来越」：</strong>
+more and more → <span class="highlight">an increasing number of / a growing proportion of / increasingly</span>
+
+<strong>表示「关于」：</strong>
+about → <span class="highlight">with regard to / concerning / as for / with respect to</span>
+
+<strong>表示「我认为」：</strong>
+I think → <span class="highlight">From my perspective / In my view / I am firmly convinced that / It is my belief that</span>`
+  }
+];
+
+const TRANSLATIONS = [
+  {
+    id: 1,
+    topic: "中国传统文化",
+    chinese: "中国书法（calligraphy）是中国文化的瑰宝之一。它不仅是一种书写艺术，更是一种修身养性的方式。书法要求书写者具备耐心、专注和审美能力。在中国，书法被视为一种高雅的艺术形式，许多家庭会将书法作品悬挂在客厅或书房中。近年来，随着中国文化的传播，越来越多的外国人开始学习中国书法。",
+    keywords: ["calligraphy", "treasure", "art of writing", "patience", "concentration", "aesthetic", "elegant", "hang", "spread", "increasingly"],
+    reference: "Chinese calligraphy is one of the treasures of Chinese culture. It is not merely an art of writing, but also a way of cultivating one's mind and character. Calligraphy requires the practitioner to possess patience, concentration, and aesthetic ability. In China, calligraphy is regarded as an elegant form of art, and many families hang calligraphy works in their living rooms or studies. In recent years, with the spread of Chinese culture, an increasing number of foreigners have begun to learn Chinese calligraphy."
+  },
+  {
+    id: 2,
+    topic: "中国经济发展",
+    chinese: "改革开放以来，中国经济取得了举世瞩目的成就。中国从一个以农业为主的发展中国家，转变为世界第二大经济体。电子商务的蓬勃发展是中国经济转型的一个显著例子。中国拥有全球最大的在线零售市场，移动支付已经深入到日常生活的方方面面。这些变化不仅提高了人民的生活水平，也为全球经济增长做出了重要贡献。",
+    keywords: ["reform and opening-up", "remarkable", "agricultural", "transform", "second largest economy", "e-commerce", "booming", "mobile payment", "living standards", "contribution"],
+    reference: "Since the reform and opening-up, China has achieved remarkable economic accomplishments. China has transformed from an agricultural developing country into the world's second largest economy. The booming development of e-commerce is a prominent example of China's economic transformation. China possesses the world's largest online retail market, and mobile payment has permeated every aspect of daily life. These changes have not only improved people's living standards but also made significant contributions to global economic growth."
+  },
+  {
+    id: 3,
+    topic: "环境保护",
+    chinese: "近年来，中国政府加大了环境保护的力度。空气污染治理取得了明显成效，许多城市的空气质量有了显著改善。与此同时，中国在可再生能源领域也取得了重大突破，成为全球最大的太阳能和风能生产国。中国还积极参与全球气候治理，承诺在2060年前实现碳中和。这些努力表明，中国正在走一条绿色、可持续的发展道路。",
+    keywords: ["environmental protection", "air pollution", "renewable energy", "solar", "wind power", "climate governance", "carbon neutrality", "sustainable", "green development"],
+    reference: "In recent years, the Chinese government has intensified its efforts in environmental protection. Significant progress has been made in air pollution control, and the air quality in many cities has improved considerably. Meanwhile, China has also achieved major breakthroughs in the field of renewable energy, becoming the world's largest producer of solar and wind power. China actively participates in global climate governance and has pledged to achieve carbon neutrality before 2060. These efforts demonstrate that China is pursuing a green and sustainable development path."
+  },
+  {
+    id: 4,
+    topic: "高等教育",
+    chinese: "中国的高等教育在过去几十年里经历了快速发展。大学扩招政策使得更多年轻人有机会接受高等教育。目前，中国拥有世界上最大规模的高等教育体系。然而，高等教育的快速发展也带来了一些挑战，比如教育质量参差不齐、毕业生就业压力增大等问题。为了应对这些挑战，中国政府正在推动高等教育的内涵式发展，注重提升教育质量和培养创新型人才。",
+    keywords: ["higher education", "expansion policy", "access", "largest scale", "quality varies", "employment pressure", "connotative development", "innovative talents"],
+    reference: "China's higher education has experienced rapid development over the past few decades. The university expansion policy has enabled more young people to access higher education. Currently, China possesses the largest higher education system in the world. However, the rapid development of higher education has also brought about some challenges, such as uneven educational quality and increasing employment pressure on graduates. To address these challenges, the Chinese government is promoting the connotative development of higher education, focusing on improving educational quality and cultivating innovative talents."
+  },
+  {
+    id: 5,
+    topic: "科技创新",
+    chinese: "中国在科技创新领域取得了令人瞩目的进展。5G技术的商用推广使中国在全球通信技术竞争中占据了领先地位。人工智能、量子计算和航天技术等前沿领域也取得了重大突破。中国的科技企业如华为、腾讯和阿里巴巴已经成长为具有全球影响力的跨国公司。政府对科研的持续投入和人才培养体系的完善，为中国科技的进一步发展奠定了坚实基础。",
+    keywords: ["technological innovation", "5G", "commercial deployment", "leading position", "artificial intelligence", "quantum computing", "frontier", "multinational", "sustained investment", "solid foundation"],
+    reference: "China has made remarkable progress in the field of technological innovation. The commercial deployment of 5G technology has positioned China at the forefront of global communications technology competition. Significant breakthroughs have also been achieved in frontier fields such as artificial intelligence, quantum computing, and space technology. Chinese tech companies like Huawei, Tencent, and Alibaba have grown into globally influential multinationals. The government's sustained investment in scientific research and the improvement of the talent cultivation system have laid a solid foundation for further development of China's technology sector."
+  }
+];
+
+const GRAMMAR = [
+  {
+    title: "虚拟语气 (Subjunctive Mood)",
+    icon: "💡",
+    rule: "六级高频考点。与现在/将来事实相反：if + 过去式（be用were），主句 would/could/might + do。与过去事实相反：if + had done，主句 would/could/might + have done。",
+    examples: [
+      {correct: "If I <em>were</em> you, I <em>would accept</em> the offer.", wrong: "If I <em>was</em> you, I <em>will accept</em> the offer."},
+      {correct: "If she <em>had studied</em> harder, she <em>would have passed</em> the exam.", wrong: "If she <em>studied</em> harder, she <em>would pass</em> the exam."},
+      {correct: "It is essential that he <em>be</em> present at the meeting.", wrong: "It is essential that he <em>is</em> present at the meeting."}
+    ],
+    tip: "注意 wish / suggest / demand / insist 等词后的 that 从句用 (should) + 动词原形"
+  },
+  {
+    title: "倒装句 (Inversion)",
+    icon: "🔄",
+    rule: "否定词或短语置于句首时，句子需要部分倒装（助动词提前）。常见触发词：never, seldom, rarely, hardly, scarcely, not only, in no way, under no circumstances, only then, little。",
+    examples: [
+      {correct: "<em>Never have</em> I seen such a beautiful sunset.", wrong: "<em>Never I have</em> seen such a beautiful sunset."},
+      {correct: "<em>Not only does</em> he speak English, but he also speaks French.", wrong: "<em>Not only he speaks</em> English..."},
+      {correct: "<em>Only when</em> the rain stopped <em>did</em> we leave.", wrong: "<em>Only when</em> the rain stopped <em>we left</em>."}
+    ],
+    tip: "so/such...that 结构中 so/such 置于句首也要倒装：So beautiful was the scenery that we stopped to admire it."
+  },
+  {
+    title: "非谓语动词 (Non-finite Verbs)",
+    icon: "📌",
+    rule: "不定式(to do)、动名词(doing)、分词(done/doing)的用法区别是六级必考。关键看逻辑主语与动词的关系：主动用 doing，被动用 done，表目的用 to do。",
+    examples: [
+      {correct: "<em>Seen</em> from the hill, the city looks magnificent.", wrong: "<em>Seeing</em> from the hill, the city looks magnificent."},
+      {correct: "<em>Not knowing</em> what to do, she burst into tears.", wrong: "<em>Not known</em> what to do, she burst into tears."},
+      {correct: "The teacher asked the students <em>to hand in</em> their homework.", wrong: "The teacher asked the students <em>handing in</em> their homework."}
+    ],
+    tip: "独立主格结构：名词/代词 + 分词，表伴随或原因（Weather permitting, we'll go hiking.）"
+  },
+  {
+    title: "定语从句 (Relative Clauses)",
+    icon: "🔗",
+    rule: "that/which 区别：只用 that 的情况：先行词有最高级、序数词、all/any/every/no 修饰，或先行词既有人又有物。which 引导非限制性定语从句。",
+    examples: [
+      {correct: "This is the best film <em>that</em> I have ever seen.", wrong: "This is the best film <em>which</em> I have ever seen."},
+      {correct: "He passed the exam, <em>which</em> made his parents happy.", wrong: "He passed the exam, <em>that</em> made his parents happy."},
+      {correct: "The reason <em>why</em> he was late was that he missed the bus.", wrong: "The reason <em>which</em> he was late was that he missed the bus."}
+    ],
+    tip: "as 引导的非限制性定语从句可放句首（As is known to all...），which 不能"
+  },
+  {
+    title: "主谓一致 (Subject-Verb Agreement)",
+    icon: "⚖️",
+    rule: "六级常考特殊规则：each/every + 单数名词用单数动词；many a / more than one + 单数名词用单数动词；A number of + 复数（许多），The number of + 单数（…的数量）。",
+    examples: [
+      {correct: "Every student and every teacher <em>is</em> present.", wrong: "Every student and every teacher <em>are</em> present."},
+      {correct: "A number of students <em>have</em> passed the exam.", wrong: "A number of students <em>has</em> passed the exam."},
+      {correct: "The number of applicants <em>is</em> increasing.", wrong: "The number of applicants <em>are</em> increasing."}
+    ],
+    tip: "就远原则：as well as / together with / along with / rather than / except + 名词，动词与前面主语一致"
+  },
+  {
+    title: "强调句 (Emphatic Structure)",
+    icon: "⚡",
+    rule: "It is/was + 被强调部分 + that/who + 其余部分。判断方法：去掉 It is/was 和 that/who 后，剩余部分能组成完整句子。",
+    examples: [
+      {correct: "<em>It was</em> yesterday <em>that</em> I met her in the park.", wrong: "<em>It was</em> yesterday <em>when</em> I met her in the park."},
+      {correct: "<em>It is</em> the teacher <em>who/that</em> inspired me.", wrong: "<em>It is</em> the teacher <em>which</em> inspired me."},
+      {correct: "<em>It was not until</em> midnight <em>that</em> he finished the work.", wrong: "<em>It was not until</em> midnight <em>when</em> he finished the work."}
+    ],
+    tip: "强调句的疑问形式：Was it yesterday that you met her? / Who was it that you met?"
+  },
+  {
+    title: "比较结构 (Comparison)",
+    icon: "📊",
+    rule: "倍数表达：A is + 倍数 + as...as / 比较级+than / the + 名词 + of + B。the more...the more 结构表越…越…。",
+    examples: [
+      {correct: "This room is <em>three times as large as</em> that one.", wrong: "This room is <em>three times larger than</em> that one. (歧义)"},
+      {correct: "<em>The more</em> you practice, <em>the better</em> you will become.", wrong: "<em>More</em> you practice, <em>better</em> you will become."},
+      {correct: "He is <em>no less</em> diligent <em>than</em> his brother.", wrong: "He is <em>not less</em> diligent <em>than</em> his brother."}
+    ],
+    tip: "no more than = only（仅仅）; not more than = at most（至多）; no less than = as many as（多达）"
+  },
+  {
+    title: "状语从句省略 (Ellipsis in Adverbial Clauses)",
+    icon: "✂️",
+    rule: "当状语从句的主语与主句主语一致，且从句含 be 动词时，可省略从句的主语和 be。常见于 when/while/if/though/unless/as 引导的从句。",
+    examples: [
+      {correct: "<em>When (he was) asked</em> about his plan, he remained silent.", wrong: "<em>When asked</em> about his plan, <em>the plan</em> remained unclear."},
+      {correct: "<em>While (I was) walking</em> in the park, I met an old friend.", wrong: "<em>While walking</em> in the park, <em>an old friend</em> was met."},
+      {correct: "<em>If (it is) possible</em>, please send the report today.", wrong: "<em>If possible</em>, <em>the report</em> should be sent today."}
+    ],
+    tip: "省略后分词的逻辑主语必须与主句主语一致，否则就是悬垂分词错误"
+  }
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+
+const STORAGE_KEY = 'cet6_data';
+
+function loadData() {
+  const d = localStorage.getItem(STORAGE_KEY);
+  if (d) return JSON.parse(d);
+  return {
+    wordStatus: {},
+    streak: 0,
+    lastStudyDate: null,
+    readCompleted: 0,
+    todayPlan: {},
+    quizCorrect: 0,
+    quizTotal: 0
+  };
+}
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+let data = loadData();
+let currentCardIndex = 0;
+let cardFlipped = false;
+let quizCurrent = null;
+let quizAnswered = false;
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+
+function switchSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-section="${id}"]`).classList.add('active');
+  if (window.innerWidth <= 768) toggleSidebar();
+  if (id === 'dashboard') updateDashboard();
+  if (id === 'vocabulary') initVocab();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+// ══════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════
+
+function updateStreak() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (data.lastStudyDate === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (data.lastStudyDate === yesterday) {
+    data.streak++;
+  } else if (data.lastStudyDate !== today) {
+    data.streak = 1;
+  }
+  data.lastStudyDate = today;
+  saveData(data);
+}
+
+function updateDashboard() {
+  const statuses = Object.values(data.wordStatus);
+  const learned = statuses.filter(s => s !== 'new').length;
+  const mastered = statuses.filter(s => s === '认识').length;
+  document.getElementById('stat-words').textContent = learned;
+  document.getElementById('stat-mastered').textContent = mastered;
+  document.getElementById('stat-passages').textContent = data.readCompleted;
+  document.getElementById('stat-streak').textContent = data.streak;
+  document.getElementById('streak-count').textContent = data.streak;
+  document.getElementById('vocab-badge').textContent = VOCAB.length - learned;
+
+  const pct = Math.round((learned / VOCAB.length) * 100);
+  document.getElementById('vocab-progress').style.width = pct + '%';
+  document.getElementById('vocab-current').textContent = `${learned} / ${VOCAB.length}`;
+
+  renderTodayPlan();
+}
+
+function renderTodayPlan() {
+  const plans = [
+    {id:'words', text:'学习 20 个新词汇', time:'20 min'},
+    {id:'reading', text:'完成 1 篇阅读理解', time:'15 min'},
+    {id:'writing', text:'背诵 1 个写作模板', time:'10 min'},
+    {id:'listening', text:'精听练习 30 分钟', time:'30 min'},
+    {id:'translation', text:'翻译练习 1 段', time:'15 min'},
+  ];
+  const container = document.getElementById('today-plan');
+  container.innerHTML = plans.map(p => {
+    const done = data.todayPlan[p.id];
+    return `<div class="plan-item ${done?'done':''}" onclick="togglePlan('${p.id}')">
+      <div class="check">${done?'✓':''}</div>
+      <span class="plan-text">${p.text}</span>
+      <span class="plan-time">${p.time}</span>
+    </div>`;
+  }).join('');
+}
+
+function togglePlan(id) {
+  data.todayPlan[id] = !data.todayPlan[id];
+  saveData(data);
+  renderTodayPlan();
+}
+
+function resetPlan() {
+  data.todayPlan = {};
+  saveData(data);
+  renderTodayPlan();
+}
+
+// ══════════════════════════════════════
+// VOCABULARY
+// ══════════════════════════════════════
+
+function initVocab() {
+  // init word statuses
+  VOCAB.forEach(v => {
+    if (!data.wordStatus[v.word]) data.wordStatus[v.word] = 'new';
+  });
+  saveData(data);
+  showCard();
+  renderWordList();
+}
+
+function switchVocabTab(tab) {
+  document.querySelectorAll('#sec-vocabulary .tab').forEach((t,i) => {
+    t.classList.toggle('active', ['flashcard','list','quiz'][i] === tab);
+  });
+  document.getElementById('vocab-flashcard').style.display = tab === 'flashcard' ? '' : 'none';
+  document.getElementById('vocab-list').style.display = tab === 'list' ? '' : 'none';
+  document.getElementById('vocab-quiz').style.display = tab === 'quiz' ? '' : 'none';
+  if (tab === 'quiz') startQuiz();
+}
+
+function showCard() {
+  if (currentCardIndex >= VOCAB.length) currentCardIndex = 0;
+  const v = VOCAB[currentCardIndex];
+  document.getElementById('fc-word').textContent = v.word;
+  document.getElementById('fc-phonetic').textContent = v.phonetic;
+  document.getElementById('fc-pos').textContent = v.pos;
+  document.getElementById('fc-meaning').textContent = v.meaning;
+  document.getElementById('fc-example').innerHTML = `${v.example}<br><span style="color:var(--text2);font-size:12px;">${v.trans}</span>`;
+  document.getElementById('fc-index').textContent = currentCardIndex + 1;
+  document.getElementById('fc-total').textContent = VOCAB.length;
+
+  const status = data.wordStatus[v.word] || 'new';
+  const statusEl = document.getElementById('fc-status');
+  if (status === 'new') { statusEl.textContent = '新词'; statusEl.className = 'tag tag-new'; }
+  else if (status === '模糊') { statusEl.textContent = '学习中'; statusEl.className = 'tag tag-learning'; }
+  else if (status === '认识') { statusEl.textContent = '已掌握'; statusEl.className = 'tag tag-mastered'; }
+  else { statusEl.textContent = '学习中'; statusEl.className = 'tag tag-learning'; }
+
+  // unflip
+  document.getElementById('flashcard').classList.remove('flipped');
+  cardFlipped = false;
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+  cardFlipped = !cardFlipped;
+}
+
+function markWord(status) {
+  const word = VOCAB[currentCardIndex].word;
+  data.wordStatus[word] = status;
+  updateStreak();
+  saveData(data);
+  currentCardIndex++;
+  showCard();
+}
+
+function nextWord() {
+  currentCardIndex = (currentCardIndex + 1) % VOCAB.length;
+  showCard();
+}
+
+function renderWordList() {
+  const container = document.getElementById('word-list-container');
+  container.innerHTML = VOCAB.map(v => {
+    const s = data.wordStatus[v.word] || 'new';
+    let tagClass = 'tag-new', tagText = '新词';
+    if (s === '认识') { tagClass = 'tag-mastered'; tagText = '已掌握'; }
+    else if (s !== 'new') { tagClass = 'tag-learning'; tagText = '学习中'; }
+    return `<div class="word-row" data-word="${v.word}" data-status="${s}">
+      <span class="en">${v.word}</span>
+      <span class="cn">${v.meaning}</span>
+      <span class="tag ${tagClass}">${tagText}</span>
+    </div>`;
+  }).join('');
+}
+
+function filterWords() {
+  const search = document.getElementById('word-search').value.toLowerCase();
+  const filter = document.getElementById('word-filter').value;
+  document.querySelectorAll('.word-row').forEach(row => {
+    const word = row.dataset.word;
+    const status = data.wordStatus[word] || 'new';
+    const matchSearch = word.includes(search);
+    let matchFilter = true;
+    if (filter === 'new') matchFilter = status === 'new';
+    else if (filter === 'learning') matchFilter = status !== 'new' && status !== '认识';
+    else if (filter === 'mastered') matchFilter = status === '认识';
+    row.style.display = matchSearch && matchFilter ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════
+
+function startQuiz() {
+  data.quizCorrect = 0;
+  data.quizTotal = 0;
+  nextQuiz();
+}
+
+function nextQuiz() {
+  quizAnswered = false;
+  document.getElementById('quiz-next').style.display = 'none';
+
+  // pick a random word
+  const idx = Math.floor(Math.random() * VOCAB.length);
+  const word = VOCAB[idx];
+  quizCurrent = word;
+
+  document.getElementById('quiz-question').textContent = `"${word.word}" 的中文意思是什么？`;
+
+  // generate 4 options (1 correct + 3 wrong)
+  let options = [word.meaning];
+  while (options.length < 4) {
+    const rand = VOCAB[Math.floor(Math.random() * VOCAB.length)];
+    if (!options.includes(rand.meaning)) options.push(rand.meaning);
+  }
+  // shuffle
+  options.sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById('quiz-options');
+  container.innerHTML = options.map((opt, i) => {
+    return `<div class="option" onclick="selectQuizOption(this, '${opt.replace(/'/g, "\\'")}', '${word.meaning.replace(/'/g, "\\'")}')">
+      <span class="letter">${'ABCD'[i]}</span>
+      <span>${opt}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('quiz-score').textContent = `正确: ${data.quizCorrect} / ${data.quizTotal}`;
+}
+
+function selectQuizOption(el, selected, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  data.quizTotal++;
+
+  document.querySelectorAll('#quiz-options .option').forEach(opt => {
+    if (opt.textContent.trim().substring(1).trim() === correct) {
+      opt.classList.add('correct');
+    }
+  });
+
+  if (selected === correct) {
+    el.classList.add('correct');
+    data.quizCorrect++;
+  } else {
+    el.classList.add('wrong');
+  }
+
+  document.getElementById('quiz-score').textContent = `正确: ${data.quizCorrect} / ${data.quizTotal}`;
+  document.getElementById('quiz-next').style.display = '';
+  saveData(data);
+}
+
+// ══════════════════════════════════════
+// READING
+// ══════════════════════════════════════
+
+let currentReadTab = 0;
+function switchReadTab(tab) {
+  currentReadTab = tab;
+  document.querySelectorAll('#sec-reading .tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+  renderReading();
+}
+
+function renderReading() {
+  const container = document.getElementById('reading-content');
+  let readings;
+  if (currentReadTab === 0) readings = READINGS.slice(0, 2);
+  else if (currentReadTab === 1) readings = READINGS.slice(2, 3);
+  else readings = READINGS.slice(3, 4);
+
+  container.innerHTML = readings.map((r, ri) => {
+    let html = `<div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-weight:600;">${r.title}</div>
+      <div class="passage">${r.passage}</div>`;
+
+    if (r.questions) {
+      html += r.questions.map((q, qi) => {
+        return `<div class="question-block" style="padding:0 20px 20px;">
+          <div class="question-text">${qi + 1}. ${q.q}</div>
+          ${q.options.map((opt, oi) => {
+            return `<div class="option" onclick="selectReadingOption(this, ${ri}, ${qi}, ${oi})" data-ri="${ri}" data-qi="${qi}" data-oi="${oi}">
+              <span class="letter">${'ABCD'[oi] || oi + 1}</span>
+              <span>${opt}</span>
+            </div>`;
+          }).join('')}
+          <div class="explanation" id="explain-${ri}-${qi}" style="display:none;"><strong>解析：</strong>${q.explain}</div>
+        </div>`;
+      }).join('');
+    }
+
+    if (r.answers) {
+      html += `<div style="padding:0 20px 20px;">
+        <div class="question-text">参考答案：</div>
+        ${r.answers.map(a => `<div style="padding:6px 0;font-size:14px;"><strong>(${a.blank})</strong> ${a.word} — ${a.meaning}</div>`).join('')}
+      </div>`;
+    }
+
+    html += `</div>`;
+    return html;
+  }).join('');
+}
+
+function selectReadingOption(el, ri, qi, oi) {
+  const reading = READINGS[ri];
+  if (!reading.questions) return;
+  const q = reading.questions[qi];
+
+  // prevent re-answer
+  const block = el.closest('.question-block');
+  if (block.dataset.answered) return;
+  block.dataset.answered = 'true';
+
+  // mark correct/wrong
+  block.querySelectorAll('.option').forEach((opt, i) => {
+    if (i === q.answer) opt.classList.add('correct');
+    if (i === oi && oi !== q.answer) opt.classList.add('wrong');
+  });
+
+  document.getElementById(`explain-${ri}-${qi}`).style.display = '';
+
+  if (oi === q.answer) {
+    data.readCompleted = Math.max(data.readCompleted, 1);
+    saveData(data);
+  }
+}
+
+// ══════════════════════════════════════
+// WRITING
+// ══════════════════════════════════════
+
+function renderWriting() {
+  const container = document.getElementById('writing-content');
+  container.innerHTML = WRITING_TEMPLATES.map((t, i) => {
+    return `<div class="template-card" onclick="toggleTemplate(${i})" id="tpl-${i}">
+      <h3>📝 ${t.title}</h3>
+      <p>${t.desc}</p>
+      <div class="template-expanded" id="tpl-body-${i}" style="display:none;">
+        <pre>${t.content}</pre>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTemplate(i) {
+  const body = document.getElementById(`tpl-body-${i}`);
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+// ══════════════════════════════════════
+// TRANSLATION
+// ══════════════════════════════════════
+
+function renderTranslation() {
+  const container = document.getElementById('translation-content');
+  container.innerHTML = TRANSLATIONS.map(t => {
+    return `<div class="card">
+      <div class="card-header">
+        <span class="card-title">🔤 ${t.topic}</span>
+        <span class="tag tag-new">翻译练习</span>
+      </div>
+      <div style="background:var(--bg);padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;line-height:1.9;">
+        ${t.chinese}
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">💡 关键词提示：</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${t.keywords.map(k => `<span style="font-size:12px;padding:3px 8px;background:rgba(108,123,247,.1);color:var(--accent);border-radius:6px;">${k}</span>`).join('')}
+        </div>
+      </div>
+      <textarea class="translation-input" id="trans-input-${t.id}" placeholder="在此输入你的英文翻译..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+        <button class="btn primary" onclick="checkTranslation(${t.id})">检查翻译</button>
+        <button class="btn" onclick="showReference(${t.id})">查看参考译文</button>
+      </div>
+      <div id="trans-result-${t.id}" style="margin-top:12px;"></div>
+      <div id="trans-ref-${t.id}" style="margin-top:12px;display:none;">
+        <div class="explanation"><strong>参考译文：</strong><br>${t.reference}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function checkTranslation(id) {
+  const input = document.getElementById(`trans-input-${id}`).value.trim();
+  if (!input) return;
+  const t = TRANSLATIONS.find(x => x.id === id);
+  const resultDiv = document.getElementById(`trans-result-${id}`);
+
+  // Simple scoring based on keyword coverage
+  const lowerInput = input.toLowerCase();
+  let matched = 0;
+  t.keywords.forEach(k => {
+    if (lowerInput.includes(k.toLowerCase())) matched++;
+  });
+  const score = Math.round((matched / t.keywords.length) * 100);
+
+  let scoreClass = 'score-low';
+  if (score >= 80) scoreClass = 'score-high';
+  else if (score >= 50) scoreClass = 'score-mid';
+
+  const missing = t.keywords.filter(k => !lowerInput.includes(k.toLowerCase()));
+
+  resultDiv.innerHTML = `
+    <div class="score-display ${scoreClass}">📊 关键词覆盖: ${score}% (${matched}/${t.keywords.length})</div>
+    ${missing.length > 0 ? `<div style="margin-top:8px;font-size:13px;color:var(--text2);">遗漏的关键词: ${missing.map(m => `<span style="color:var(--red)">${m}</span>`).join(', ')}</div>` : ''}
+    <div style="margin-top:8px;font-size:12px;color:var(--text2);">提示：关键词覆盖仅供参考，语法和表达的准确性同样重要。</div>
+  `;
+}
+
+function showReference(id) {
+  const ref = document.getElementById(`trans-ref-${id}`);
+  ref.style.display = ref.style.display === 'none' ? '' : 'none';
+}
+
+// ══════════════════════════════════════
+// GRAMMAR
+// ══════════════════════════════════════
+
+function renderGrammar() {
+  const container = document.getElementById('grammar-content');
+  container.innerHTML = GRAMMAR.map(g => {
+    return `<div class="grammar-card">
+      <h3>${g.icon} ${g.title}</h3>
+      <div class="rule">${g.rule}</div>
+      ${g.examples.map(ex => {
+        return `<div class="example">
+          ✅ <em>${ex.correct}</em><br>
+          ❌ <span class="wrong-ex">${ex.wrong}</span>
+        </div>`;
+      }).join('')}
+      ${g.tip ? `<div style="font-size:12px;color:var(--orange);margin-top:8px;">⚡ 注意: ${g.tip}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+
+updateStreak();
+updateDashboard();
+initVocab();
+renderReading();
+renderWriting();
+renderTranslation();
+renderGrammar();
+</script>
+</body>
+</html>
