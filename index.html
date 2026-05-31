@@ -826,12 +826,11 @@
     <!-- Reading -->
     <div class="section" id="sec-reading">
       <h2 class="section-title">阅读理解</h2>
-      <p class="section-desc">六级真题风格阅读训练，提升理解与答题能力</p>
+      <p class="section-desc">真题训练 + 解题技巧</p>
 
       <div class="tabs">
-        <div class="tab active" onclick="switchReadTab(0)">仔细阅读</div>
-        <div class="tab" onclick="switchReadTab(1)">长篇阅读</div>
-        <div class="tab" onclick="switchReadTab(2)">选词填空</div>
+        <div class="tab active" onclick="switchReadTab(0)">📖 真题练习</div>
+        <div class="tab" onclick="switchReadTab(1)">🎯 解题技巧</div>
       </div>
 
       <div id="reading-content"></div>
@@ -1662,43 +1661,101 @@ function switchReadTab(tab) {
   renderReading();
 }
 
+const EXAM_RESOURCES = [
+  {name:"英语真题在线", url:"https://zhenti.burningvocabulary.cn/cet6", desc:"2016-2025年共60套真题，带答案解析和听力音频。近期真题免费，部分旧题需付费(9.9元)", free:"部分免费", tags:["真题","听力","答案"]},
+  {name:"WeHUSTER 六级真题", url:"https://www.wehuster.com/cet6", desc:"2019-2025年真题和解析，可按考试流程练习", free:"免费", tags:["真题","解析"]},
+  {name:"在线真题库", url:"https://pastpapers.cn/cet-6", desc:"67套2015-2025年真题，支持按年份浏览", free:"免费", tags:["真题","PDF"]},
+  {name:"新东方六级真题", url:"https://cet4-6.xdf.cn/", desc:"新东方出品，真题+答案解析+备考资料", free:"免费", tags:["真题","解析","技巧"]},
+  {name:"百度文库六级", url:"https://wenku.baidu.com/", desc:"搜索\"六级真题\"可找到大量真题文档", free:"部分免费", tags:["文档","真题"]},
+];
+
+const READ_TIPS = [
+  {title:"仔细阅读（20%分值）", tips:[
+    "先读题干，划关键词（人名、数字、专有名词），再回文定位",
+    "答案通常是原文的同义替换，照搬原文的选项多为干扰",
+    "主旨题看首尾段，细节题定位原文，推断题找逻辑关系",
+    "排除法：绝对化选项(all/never/always)通常是错的",
+    "态度题注意作者用词：skeptical/supportive/critical/neutral"
+  ]},
+  {title:"长篇阅读（10%分值）", tips:[
+    "先看10道题的关键词，带着问题扫读文章",
+    "每段读首句和末句，快速把握段落大意",
+    "一个段落可能对应多道题，不要假设一对一",
+    "同义替换是核心：题目用词一定与原文不同",
+    "时间紧的话先做确定的匹配，不确定的最后排除"
+  ]},
+  {title:"选词填空（5%分值）", tips:[
+    "先把15个选项按词性分类（名词/动词/形容词/副词）",
+    "根据空格前后判断需要什么词性",
+    "确定词性后再根据语义选择，注意单复数和时态",
+    "分值最低(5%)，建议最后做，控制在5-7分钟",
+    "不认识的词靠词性排除，至少能排除到2选1"
+  ]},
+];
+
 function renderReading() {
   const container = document.getElementById('reading-content');
-  let readings;
-  if (currentReadTab === 0) readings = READINGS.slice(0, 2);
-  else if (currentReadTab === 1) readings = READINGS.slice(2, 3);
-  else readings = READINGS.slice(3, 4);
+  if (currentReadTab === 0) {
+    // Real exam resource links
+    container.innerHTML = `
+      <div class="card" style="background:linear-gradient(135deg,rgba(108,123,247,.08),rgba(52,211,153,.05));border-color:rgba(108,123,247,.2);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:20px;">⚡</span>
+          <span style="font-weight:700;font-size:15px;">六级笔试倒计时</span>
+        </div>
+        <div id="exam-countdown" style="font-size:24px;font-weight:700;color:var(--accent);"></div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">2026年6月13日 15:00</div>
+      </div>
+      <div style="font-size:14px;color:var(--text2);margin:16px 0 12px;">以下为权威六级真题资源，点击直接跳转练习：</div>
+      ${EXAM_RESOURCES.map(r => `
+        <a href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div class="card" style="cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+              <div style="font-weight:600;font-size:15px;">${r.name}</div>
+              <span style="font-size:11px;padding:3px 8px;border-radius:6px;${r.free==='免费'?'background:rgba(52,211,153,.12);color:var(--green)':'background:rgba(251,191,36,.12);color:var(--orange)'}">${r.free}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.6;">${r.desc}</div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+              ${r.tags.map(t => `<span style="font-size:11px;padding:2px 7px;background:var(--bg);border-radius:5px;color:var(--text2)">${t}</span>`).join('')}
+            </div>
+          </div>
+        </a>
+      `).join('')}
+      <div style="font-size:12px;color:var(--text2);margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;line-height:1.7;">
+        💡 <strong>建议：</strong>优先使用<strong>英语真题在线</strong>和<strong>WeHUSTER</strong>，近期真题免费且答案经过核对。做题时严格计时，仔细阅读每篇控制在15分钟以内。
+      </div>
+    `;
+    // Update countdown
+    updateExamCountdown();
+  } else {
+    // Reading tips
+    container.innerHTML = READ_TIPS.map(section => `
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px;">📝 ${section.title}</div>
+        ${section.tips.map((tip, i) => `
+          <div style="display:flex;gap:10px;padding:8px 0;${i < section.tips.length-1?'border-bottom:1px solid var(--border);':''}">
+            <span style="color:var(--accent);font-weight:600;font-size:13px;min-width:18px;">${i+1}.</span>
+            <span style="font-size:14px;line-height:1.6;">${tip}</span>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+}
 
-  container.innerHTML = readings.map((r, ri) => {
-    let html = `<div class="card" style="padding:0;overflow:hidden;">
-      <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-weight:600;">${r.title}</div>
-      <div class="passage">${r.passage}</div>`;
-
-    if (r.questions) {
-      html += r.questions.map((q, qi) => {
-        return `<div class="question-block" style="padding:0 20px 20px;">
-          <div class="question-text">${qi + 1}. ${q.q}</div>
-          ${q.options.map((opt, oi) => {
-            return `<div class="option" onclick="selectReadingOption(this, ${ri}, ${qi}, ${oi})" data-ri="${ri}" data-qi="${qi}" data-oi="${oi}">
-              <span class="letter">${'ABCD'[oi] || oi + 1}</span>
-              <span>${opt}</span>
-            </div>`;
-          }).join('')}
-          <div class="explanation" id="explain-${ri}-${qi}" style="display:none;"><strong>解析：</strong>${q.explain}</div>
-        </div>`;
-      }).join('');
-    }
-
-    if (r.answers) {
-      html += `<div style="padding:0 20px 20px;">
-        <div class="question-text">参考答案：</div>
-        ${r.answers.map(a => `<div style="padding:6px 0;font-size:14px;"><strong>(${a.blank})</strong> ${a.word} — ${a.meaning}</div>`).join('')}
-      </div>`;
-    }
-
-    html += `</div>`;
-    return html;
-  }).join('');
+function updateExamCountdown() {
+  const exam = new Date('2026-06-13T15:00:00+08:00');
+  const now = new Date();
+  const diff = exam - now;
+  if (diff <= 0) {
+    document.getElementById('exam-countdown').textContent = '考试已结束';
+    return;
+  }
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('exam-countdown').textContent = `${days} 天 ${hours} 小时 ${mins} 分钟`;
+  setTimeout(updateExamCountdown, 60000);
 }
 
 function selectReadingOption(el, ri, qi, oi) {
