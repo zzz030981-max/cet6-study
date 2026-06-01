@@ -680,13 +680,13 @@
 </head>
 <body>
 
-<!-- WeChat in-app browser detection -->
+<!-- WeChat in-app browser: try loading first, show redirect only on failure -->
 <div id="wx-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#f5f6fa;">
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;">
     <div style="font-size:48px;margin-bottom:20px;">📘</div>
     <div style="font-size:22px;font-weight:700;color:#1a1d27;margin-bottom:12px;">CET-6 六级备考助手</div>
     <div style="font-size:15px;color:#6b7084;line-height:1.7;margin-bottom:30px;max-width:320px;">
-      微信内置浏览器可能无法正常打开此页面，<strong style="color:#ef4444;">请点击右上角 ··· 选择「在浏览器中打开」</strong>
+      页面加载遇到问题，<strong style="color:#ef4444;">请点击右上角 ··· 选择「在浏览器中打开」</strong>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;">
       <button onclick="copyUrl()" style="padding:14px;background:#5568f7;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
@@ -703,9 +703,17 @@
 <script>
 (function() {
   var ua = navigator.userAgent.toLowerCase();
-  if (/micromessenger|qq\/|weibo|dingtalk|alipay/i.test(ua)) {
-    document.getElementById('wx-overlay').style.display = 'block';
-  }
+  var isWeChat = /micromessenger/i.test(ua);
+  if (!isWeChat) return;
+
+  // WeChat detected: set a timeout to check if page loaded correctly
+  setTimeout(function() {
+    var app = document.querySelector('.app');
+    // If the app element doesn't exist or is empty, page failed to load
+    if (!app || app.offsetHeight < 100) {
+      document.getElementById('wx-overlay').style.display = 'block';
+    }
+  }, 5000); // Wait 5 seconds for page to load
 })();
 function copyUrl() {
   var url = 'https://zzz030981-max.github.io/cet6-study/';
