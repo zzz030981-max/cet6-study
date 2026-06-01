@@ -991,10 +991,7 @@ function showCopyHint() {
 let VOCAB = [];
 var _vocabLoaded = false;
 (function(){
-  setTimeout(function() {
-    var ls = document.getElementById('loading-screen');
-    if (ls) { ls.style.opacity = '0'; setTimeout(function(){ ls.style.display = 'none'; }, 300); }
-  }, 3000);
+
   try {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'vocab.json', true);
