@@ -680,64 +680,11 @@
 </head>
 <body>
 
-<!-- WeChat in-app browser: try loading first, show redirect only on failure -->
-<div id="wx-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#f5f6fa;">
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;">
-    <div style="font-size:48px;margin-bottom:20px;">📘</div>
-    <div style="font-size:22px;font-weight:700;color:#1a1d27;margin-bottom:12px;">CET-6 六级备考助手</div>
-    <div style="font-size:15px;color:#6b7084;line-height:1.7;margin-bottom:30px;max-width:320px;">
-      页面加载遇到问题，<strong style="color:#ef4444;">请点击右上角 ··· 选择「在浏览器中打开」</strong>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;">
-      <button onclick="copyUrl()" style="padding:14px;background:#5568f7;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
-        📋 复制链接
-      </button>
-      <div id="copy-hint" style="font-size:13px;color:#10b981;display:none;">✅ 链接已复制，请粘贴到浏览器地址栏打开</div>
-    </div>
-    <div style="margin-top:30px;font-size:12px;color:#9ca3af;">
-      推荐使用 Safari / Chrome 浏览器访问
-    </div>
-  </div>
-</div>
-
-<script>
-(function() {
-  var ua = navigator.userAgent.toLowerCase();
-  var isWeChat = /micromessenger/i.test(ua);
-  if (!isWeChat) return;
-
-  // WeChat detected: set a timeout to check if page loaded correctly
-  setTimeout(function() {
-    var app = document.querySelector('.app');
-    // If the app element doesn't exist or is empty, page failed to load
-    if (!app || app.offsetHeight < 100) {
-      document.getElementById('wx-overlay').style.display = 'block';
-    }
-  }, 5000); // Wait 5 seconds for page to load
-})();
-function copyUrl() {
-  var url = 'https://zzz030981-max.github.io/cet6-study/';
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(showCopyHint);
-  } else {
-    var ta = document.createElement('textarea');
-    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta); showCopyHint();
-  }
-}
-function showCopyHint() {
-  var h = document.getElementById('copy-hint');
-  h.style.display = 'block';
-  setTimeout(function(){ h.style.display = 'none'; }, 3000);
-}
-</script>
-
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <!-- Loading indicator -->
-<div id="loading-screen" style="position:fixed;inset:0;z-index:9998;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;">
+<div id="loading-screen" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;">
   <div style="font-size:36px;margin-bottom:16px;">📘</div>
   <div style="font-size:16px;color:var(--text2);">加载中...</div>
 </div>
@@ -985,7 +932,22 @@ function showCopyHint() {
 // ══════════════════════════════════════
 
 let VOCAB = [];
-fetch('vocab.json').then(r => r.json()).then(d => { VOCAB = d; initVocab(); }).catch(() => { VOCAB = []; });
+(function(){
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'vocab.json', true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          try { VOCAB = JSON.parse(xhr.responseText); } catch(e) { VOCAB = []; }
+        }
+        initVocab();
+      }
+    };
+    xhr.onerror = function() { initVocab(); };
+    xhr.send();
+  } catch(e) { initVocab(); }
+})();
 
 const READINGS = [
   // 仔细阅读
@@ -2216,6 +2178,7 @@ function toggleTheme() {
 // ══════════════════════════════════════
 
 function speakWord(word) {
+  try {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(word);
@@ -2228,12 +2191,15 @@ function speakWord(word) {
     || voices.find(v => v.lang.startsWith('en'));
   if (enVoice) utter.voice = enVoice;
   window.speechSynthesis.speak(utter);
+  } catch(e) {}
 }
 
 // Preload voices
-if ('speechSynthesis' in window) {
-  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-}
+try {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
+  }
+} catch(e) {}
 
 // ══════════════════════════════════════
 // INIT
