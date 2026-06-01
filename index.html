@@ -894,8 +894,13 @@
     <!-- Translation -->
     <div class="section" id="sec-translation">
       <h2 class="section-title">翻译训练</h2>
-      <p class="section-desc">中国文化/社会/经济主题翻译练习</p>
+      <p class="section-desc">中国文化/社会/经济主题翻译练习 + 真题资源</p>
 
+      <div class="tabs">
+        <div class="tab active" onclick="switchTransTab(0)">✏️ 练习</div>
+        <div class="tab" onclick="switchTransTab(1)">🎯 技巧</div>
+        <div class="tab" onclick="switchTransTab(2)">🔗 真题资源</div>
+      </div>
       <div id="translation-content"></div>
     </div>
 
@@ -2698,34 +2703,94 @@ function toggleTemplate(i) {
 // TRANSLATION
 // ══════════════════════════════════════
 
+let currentTransTab = 0;
+function switchTransTab(tab) {
+  currentTransTab = tab;
+  document.querySelectorAll('#sec-translation .tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+  renderTranslation();
+}
+
+const TRANS_TIPS = [
+  {title:"审题：确定主题和关键词", detail:"先通读中文原文，确定主题（文化/社会/经济/科技），划出3-5个核心概念词。这些词必须翻译准确，是评分的关键点。不确定的专有名词用解释性翻译，不要硬翻。"},
+  {title:"拆分长句，化整为零", detail:"中文原文通常是一个长段落。先按句号拆分成独立句子，每句单独翻译。遇到长句再按逗号拆分。英文句子平均15-20词为宜，不要写50词以上的超长句。"},
+  {title:"主语确定是第一步", detail:"中文经常省略主语，英文不能。翻译前先确定每句话的主语是什么。如果中文没有明确主语，可以用it/they/the government/people等补上。"},
+  {title:"时态选择", detail:"描述历史用过去时，描述现状用现在时，描述趋势用现在完成时或将来时。同一段落时态要保持一致，不要混用。"},
+  {title:"中国文化专有词处理", detail:"遇到中国文化专有词，三种处理方式：1)音译+解释：Kung Fu (Chinese martial arts)；2)直译+解释：the Spring Festival (Chinese New Year)；3)意译：儒家思想(Confucianism)。优先用第3种。"},
+  {title:"不要逐字翻译", detail:"中文和英文的表达方式不同。不要一个字一个字地翻译，要翻译意思。例如'随着...的发展'不要翻成'with the development of...'（这个表达虽然正确但太老套），可以翻成'As...grows/evolves/expands'。"},
+  {title:"常用高分句型", detail:"1) It is widely acknowledged that...（人们普遍认为）2) ... plays a vital/indispensable role in...（在…中起重要作用）3) The past few decades have witnessed...（过去几十年见证了）4) ... has given rise to / led to / resulted in...（导致了）5) There is a growing awareness that...（人们越来越意识到）"},
+  {title:"检查三要素", detail:"翻译完成后检查：1)时态是否一致；2)主谓是否一致（单复数）；3)是否有拼写错误。这三项是最基本的扣分点，避免低级错误比追求高分表达更重要。"},
+];
+
+const TRANS_RESOURCES = [
+  {name:"新东方六级翻译", url:"https://www.xdf.cn/771/202506/14531574.html", desc:"2025年6月六级翻译真题+答案（三套全），权威解析", free:"免费", icon:"📝"},
+  {name:"文都六级翻译专区", url:"https://cet46.wendu.com/cet6/fanyi/", desc:"历年六级翻译真题+详解，技巧讲解", free:"免费", icon:"📝"},
+  {name:"过级鸭真题库", url:"https://www.guojiya.cn/", desc:"2013-2025年140+套真题在线练习，含翻译部分", free:"免费", icon:"🦆"},
+  {name:"WeHUSTER 六级真题", url:"https://www.wehuster.com/cet6", desc:"2019-2025年真题，含翻译部分，可按流程练习", free:"免费", icon:"🎧"},
+  {name:"英语真题在线", url:"https://zhenti.burningvocabulary.cn/cet6", desc:"2016-2025年真题，含翻译，带答案解析", free:"部分免费", icon:"📖"},
+  {name:"B站翻译真题带练", url:"https://www.bilibili.com/video/BV1VTjMzBEU9/", desc:"视频讲解六级翻译真题，逐句分析，适合跟练", free:"免费", icon:"🎬"},
+  {name:"听力课堂翻译真题", url:"https://www.tingclass.net/show-7706-593020-1.html", desc:"2024年六级翻译真题+参考译文", free:"免费", icon:"📝"},
+];
+
 function renderTranslation() {
   const container = document.getElementById('translation-content');
-  container.innerHTML = TRANSLATIONS.map(t => {
-    return `<div class="card">
-      <div class="card-header">
-        <span class="card-title">🔤 ${t.topic}</span>
-        <span class="tag tag-new">翻译练习</span>
-      </div>
-      <div style="background:var(--bg);padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;line-height:1.9;">
-        ${t.chinese}
-      </div>
-      <div style="margin-bottom:12px;">
-        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">💡 关键词提示：</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${t.keywords.map(k => `<span style="font-size:12px;padding:3px 8px;background:rgba(108,123,247,.1);color:var(--accent);border-radius:6px;">${k}</span>`).join('')}
+  if (currentTransTab === 0) {
+    // Practice exercises
+    container.innerHTML = TRANSLATIONS.map(t => {
+      return `<div class="card">
+        <div class="card-header">
+          <span class="card-title">🔤 ${t.topic}</span>
+          <span class="tag tag-new">翻译练习</span>
         </div>
-      </div>
-      <textarea class="translation-input" id="trans-input-${t.id}" placeholder="在此输入你的英文翻译..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
-        <button class="btn primary" onclick="checkTranslation(${t.id})">检查翻译</button>
-        <button class="btn" onclick="showReference(${t.id})">查看参考译文</button>
-      </div>
-      <div id="trans-result-${t.id}" style="margin-top:12px;"></div>
-      <div id="trans-ref-${t.id}" style="margin-top:12px;display:none;">
-        <div class="explanation"><strong>参考译文：</strong><br>${t.reference}</div>
-      </div>
+        <div style="background:var(--bg);padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;line-height:1.9;">
+          ${t.chinese}
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">💡 关键词提示：</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${t.keywords.map(k => `<span style="font-size:12px;padding:3px 8px;background:rgba(108,123,247,.1);color:var(--accent);border-radius:6px;">${k}</span>`).join('')}
+          </div>
+        </div>
+        <textarea class="translation-input" id="trans-input-${t.id}" placeholder="在此输入你的英文翻译..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn primary" onclick="checkTranslation(${t.id})">检查翻译</button>
+          <button class="btn" onclick="showReference(${t.id})">查看参考译文</button>
+        </div>
+        <div id="trans-result-${t.id}" style="margin-top:12px;"></div>
+        <div id="trans-ref-${t.id}" style="margin-top:12px;display:none;">
+          <div class="explanation"><strong>参考译文：</strong><br>${t.reference}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else if (currentTransTab === 1) {
+    // Tips
+    container.innerHTML = `<div class="card">
+      <div class="card-title" style="margin-bottom:16px;">🎯 翻译应试技巧（${TRANS_TIPS.length}条）</div>
+      ${TRANS_TIPS.map((t, i) => `
+        <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;">
+          <div style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--accent);">${i+1}. ${t.title}</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8;">${t.detail}</div>
+        </div>
+      `).join('')}
     </div>`;
-  }).join('');
+  } else {
+    // Resources
+    container.innerHTML = `<div class="card">
+      <div class="card-title" style="margin-bottom:12px;">🔗 翻译真题资源</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">以下权威网站提供六级翻译真题、答案解析和练习：</div>
+      ${TRANS_RESOURCES.map(r => `
+        <a href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'">
+            <span style="font-size:20px;">${r.icon}</span>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:14px;">${r.name}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;">${r.desc}</div>
+            </div>
+            <span style="font-size:11px;padding:3px 8px;border-radius:6px;${r.free==='免费'?'background:rgba(52,211,153,.12);color:var(--green)':'background:rgba(251,191,36,.12);color:var(--orange)'}">${r.free}</span>
+          </div>
+        </a>
+      `).join('')}
+    </div>`;
+  }
 }
 
 function checkTranslation(id) {
