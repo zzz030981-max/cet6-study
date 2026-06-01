@@ -19,6 +19,19 @@
     --orange: #fbbf24;
     --radius: 12px;
   }
+  html.light {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --surface2: #eef0f5;
+    --border: #d8dbe5;
+    --text: #1a1d27;
+    --text2: #6b7084;
+    --accent: #5568f7;
+    --accent2: #3f4fd0;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f59e0b;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -669,8 +682,13 @@
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <h1>📘 CET-6 备考</h1>
-      <p>六级英语学习助手</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h1>📘 CET-6 备考</h1>
+          <p>六级英语学习助手</p>
+        </div>
+        <button onclick="toggleTheme()" id="theme-btn" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;transition:all .2s;" title="切换亮色/暗色模式">🌙</button>
+      </div>
     </div>
     <div class="nav-item active" data-section="dashboard" onclick="switchSection('dashboard')">
       <span class="icon">📊</span> 学习概览
@@ -767,6 +785,7 @@
           <div class="flashcard" id="flashcard">
             <div class="flashcard-face flashcard-front">
               <div class="flashcard-word" id="fc-word">elaborate</div>
+              <button onclick="event.stopPropagation();speakWord(document.getElementById('fc-word').textContent)" style="background:var(--accent);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;margin-bottom:6px;transition:transform .15s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" title="播放读音">🔊</button>
               <div class="flashcard-phonetic" id="fc-phonetic">/ɪˈlæbərət/</div>
               <div class="flashcard-pos" id="fc-pos">adj. / v.</div>
               <div class="flashcard-hint">点击翻转查看释义</div>
@@ -839,96 +858,15 @@
     <!-- Listening -->
     <div class="section" id="sec-listening">
       <h2 class="section-title">听力训练</h2>
-      <p class="section-desc">六级听力技巧与模拟训练</p>
+      <p class="section-desc">系统化听力技巧 + 真题资源</p>
 
-      <div class="card">
-        <div class="card-title" style="margin-bottom:16px;">🎯 听力应试技巧</div>
-        <div style="display:grid;gap:12px;">
-          <div style="padding:12px;background:var(--bg);border-radius:8px;">
-            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">1. 预读选项（最关键）</div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
-              利用播放 Direction 的时间快速浏览选项，划出关键词（名词、动词、数字）。通过选项推测问题类型和对话主题。选项中的重复词往往是对话主题。
-            </div>
-          </div>
-          <div style="padding:12px;background:var(--bg);border-radius:8px;">
-            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">2. 听到什么不选什么</div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
-              六级听力大量考查同义替换。选项中与原文完全一致的词往往是干扰项，正确答案通常是原文的同义改写。
-            </div>
-          </div>
-          <div style="padding:12px;background:var(--bg);border-radius:8px;">
-            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">3. 注意转折与强调</div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
-              but / however / actually / in fact / the point is 后面的内容是高频考点。语气变化（重读、停顿）也是重要信号。
-            </div>
-          </div>
-          <div style="padding:12px;background:var(--bg);border-radius:8px;">
-            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">4. 讲座/演讲题型策略</div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
-              注意开头的主题句和结尾的总结。举例处（for example / take...for instance）常出题。注意序数词（first, second）提示的结构。
-            </div>
-          </div>
-          <div style="padding:12px;background:var(--bg);border-radius:8px;">
-            <div style="font-weight:600;font-size:14px;margin-bottom:6px;">5. 高频场景词汇</div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.7;">
-              <strong>校园：</strong>seminar, assignment, deadline, tuition, scholarship, dormitory<br>
-              <strong>工作：</strong>resume, promotion, overtime, negotiate, qualification<br>
-              <strong>健康：</strong>symptom, prescription, therapy, allergy, surgery<br>
-              <strong>商务：</strong>quarterly, revenue, merger, acquisition, logistics
-            </div>
-          </div>
-        </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchListenTab(0)">🎯 核心技巧</div>
+        <div class="tab" onclick="switchListenTab(1)">📝 题型攻略</div>
+        <div class="tab" onclick="switchListenTab(2)">📚 高频词汇</div>
+        <div class="tab" onclick="switchListenTab(3)">🔗 真题资源</div>
       </div>
-
-      <div class="card">
-        <div class="card-title" style="margin-bottom:16px;">📋 听力题型分布</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-          <div style="padding:14px;background:var(--bg);border-radius:8px;text-align:center;">
-            <div style="font-size:24px;font-weight:700;color:var(--accent);">8%</div>
-            <div style="font-size:13px;color:var(--text2);margin-top:4px;">长对话 × 2</div>
-            <div style="font-size:11px;color:var(--text2);">每题 1 分</div>
-          </div>
-          <div style="padding:14px;background:var(--bg);border-radius:8px;text-align:center;">
-            <div style="font-size:24px;font-weight:700;color:var(--accent);">8%</div>
-            <div style="font-size:13px;color:var(--text2);margin-top:4px;">听力篇章 × 3</div>
-            <div style="font-size:11px;color:var(--text2);">每题 1 分</div>
-          </div>
-          <div style="padding:14px;background:var(--bg);border-radius:8px;text-align:center;">
-            <div style="font-size:24px;font-weight:700;color:var(--green);">20%</div>
-            <div style="font-size:13px;color:var(--text2);margin-top:4px;">讲座/讲话 × 7</div>
-            <div style="font-size:11px;color:var(--text2);">每题 2 分</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title" style="margin-bottom:16px;">📋 真题听力资源</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">以下网站提供六级真题听力音频和练习：</p>
-        <a href="https://zhenti.burningvocabulary.cn/cet6" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
-          <div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
-            <div style="font-weight:600;font-size:14px;">🎧 英语真题在线 — 六级听力真题</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:4px;">2016-2025年真题听力音频，在线播放，部分免费</div>
-          </div>
-        </a>
-        <a href="https://www.wehuster.com/cet6" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
-          <div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
-            <div style="font-weight:600;font-size:14px;">🎧 WeHUSTER — 六级听力在线练习</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:4px;">按考试流程模拟听力练习，免费</div>
-          </div>
-        </a>
-        <a href="https://www.bbc.co.uk/learningenglish/english/features/6-minute-english" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
-          <div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
-            <div style="font-weight:600;font-size:14px;">📻 BBC 6 Minute English</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:4px;">6分钟一期，语速适中，带文本，免费</div>
-          </div>
-        </a>
-        <a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
-          <div style="padding:12px;background:var(--bg);border-radius:8px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'" >
-            <div style="font-weight:600;font-size:14px;">📻 VOA Learning English</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:4px;">标准美音，语速较慢，适合精听训练，免费</div>
-          </div>
-        </a>
-      </div>
+      <div id="listen-content"></div>
     </div>
 
     <!-- Writing -->
@@ -2515,6 +2453,7 @@ function renderWordList() {
     if (s === '认识') { tagClass = 'tag-mastered'; tagText = '已掌握'; }
     else if (s !== 'new') { tagClass = 'tag-learning'; tagText = '学习中'; }
     return `<div class="word-row" data-word="${v.word}" data-status="${s}">
+      <button onclick="speakWord('${v.word}')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 6px;" title="播放读音">🔊</button>
       <span class="en">${v.word}</span>
       <span class="cn">${v.meaning}</span>
       <span class="tag ${tagClass}">${tagText}</span>
@@ -2843,6 +2782,223 @@ function renderGrammar() {
 }
 
 // ══════════════════════════════════════
+// LISTENING DATA & RENDER
+// ══════════════════════════════════════
+
+let currentListenTab = 0;
+function switchListenTab(tab) {
+  currentListenTab = tab;
+  document.querySelectorAll('#sec-listening .tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+  renderListening();
+}
+
+const LISTEN_TIPS = {
+  core: [
+    {title:"预读选项（最重要）", detail:"利用每段录音播放Direction的15-20秒快速浏览4个选项。划出选项中的关键词：名词（主题线索）、动词（动作线索）、数字（时间/价格/数量）、否定词（not/never/hardly）。四个选项的共同词就是对话主题，差异词就是考点。"},
+    {title:"同义替换原则", detail:"六级听力的核心考查方式是同义替换。正确答案几乎不会用原文原词，而是用不同的表达方式转述同一含义。例如原文说'it slipped my mind'，正确选项可能是'he forgot about it'。反之，选项中出现原文原词的往往是干扰项。"},
+    {title:"转折处必出题", detail:"听到以下信号词时立刻集中注意力，后面90%会出题：but, however, yet, actually, in fact, as a matter of fact, to tell you the truth, the thing is, what I really mean is, unfortunately, on the contrary, instead, rather than。转折后面才是说话人真正想表达的意思。"},
+    {title:"语调和重读", detail:"说话人重读的词往往是关键信息。当说话人放慢语速、提高音调或停顿时，这些词通常与答案直接相关。反问句（Isn't that...? / Don't you think...?）表达的是肯定含义，是高频考点。"},
+    {title:"排除法", detail:"遇到不确定的题用排除法：1)排除与常识矛盾的选项；2)排除过于绝对的选项（all/never/always/everyone）；3)排除只提到部分信息的选项；4)排除语气过于强烈的选项。六级正确答案通常是语气适中、表述谨慎的选项。"},
+    {title:"边听边记", detail:"用缩写和符号快速记录关键信息：数字、时间、地点、人名、因果关系。例如用↑表示增加，↓表示减少，→表示导致，∵表示因为，∴表示所以。不需要写完整单词，记首字母即可。"},
+    {title:"最后一题策略", detail:"六级听力最后一道题（讲座/讲话）通常考总结或推断。如果前面没听清，根据已听信息和常识推断。讲座题的正确答案往往是对全文主旨的概括，而不是某个细节。"},
+    {title:"时间管理", detail:"每道题之间有15秒答题时间。前5秒选出答案，后10秒预读下一题选项。不要在某一道题上纠结太久，选完立刻看下一题的选项。听力没有回头检查的机会。"},
+  ],
+  types: [
+    {title:"长对话（8题，8%）", desc:"两段长对话，每段4题。对话通常发生在校园或职场场景。", strategies:[
+      "第一题通常问对话主题或地点，听开头1-2句",
+      "第二、三题问细节（原因、方式、时间），听中间部分",
+      "最后一题常问说话人的态度或下一步计划，听结尾",
+      "注意对话中的建议句型：Why don't you... / You'd better... / How about...",
+      "注意转折：说话人先说一件事，然后but转到真正要表达的意思",
+    ]},
+    {title:"听力篇章（10题，10%）", desc:"三段短文，每段3-4题。题材涉及社会、科技、文化等。", strategies:[
+      "短文第一句通常是主题句，概括全文大意",
+      "听清每段的首句，把握文章结构",
+      "举例处（for example, such as, take...for instance）常出细节题",
+      "数字、日期、百分比等具体信息是高频考点",
+      "结尾处的总结或建议常出最后一题",
+    ]},
+    {title:"讲座/讲话（10题，20%）", desc:"三段讲座/讲话，分值最高。内容偏学术，语速较快。", strategies:[
+      "开头30秒内会点明主题，必须听清",
+      "注意序数词信号：first/second/third, to begin with, moreover, finally",
+      "定义处（X is/means/refers to）是高频考点",
+      "因果关系（because, since, as a result, lead to）常出题",
+      "对比处（compared with, unlike, in contrast）常出题",
+      "结尾的建议或展望常出最后一题",
+      "分值最高(每题2分)，即使前面没听好也不要放弃这部分",
+    ]},
+  ],
+  vocab: [
+    {scene:"校园生活", words:[
+      {en:"seminar",cn:"研讨会"},{en:"assignment",cn:"作业"},{en:"deadline",cn:"截止日期"},
+      {en:"tuition",cn:"学费"},{en:"scholarship",cn:"奖学金"},{en:"dormitory",cn:"宿舍"},
+      {en:"curriculum",cn:"课程"},{en:"enrollment",cn:"注册"},{en:"thesis",cn:"论文"},
+      {en:"supervisor",cn:"导师"},{en:"undergraduate",cn:"本科生"},{en:"postgraduate",cn:"研究生"},
+      {en:"elective",cn:"选修课"},{en:"compulsory",cn:"必修课"},{en:"GPA",cn:"绩点"},
+      {en:"plagiarism",cn:"抄袭"},{en:"citation",cn:"引用"},{en:"orientation",cn:"新生入学指导"},
+    ]},
+    {scene:"职场工作", words:[
+      {en:"resume",cn:"简历"},{en:"promotion",cn:"晋升"},{en:"overtime",cn:"加班"},
+      {en:"negotiate",cn:"谈判"},{en:"qualification",cn:"资质"},{en:"colleague",cn:"同事"},
+      {en:"interview",cn:"面试"},{en:"probation",cn:"试用期"},{en:"resignation",cn:"辞职"},
+      {en:"compensation",cn:"薪酬"},{en:"benefits",cn:"福利"},{en:"productivity",cn:"生产力"},
+      {en:"deadline",cn:"截止期限"},{en:"teamwork",cn:"团队合作"},{en:"supervisor",cn:"主管"},
+    ]},
+    {scene:"医疗健康", words:[
+      {en:"symptom",cn:"症状"},{en:"prescription",cn:"处方"},{en:"therapy",cn:"治疗"},
+      {en:"allergy",cn:"过敏"},{en:"surgery",cn:"手术"},{en:"diagnosis",cn:"诊断"},
+      {en:"infection",cn:"感染"},{en:"chronic",cn:"慢性的"},{en:"rehabilitation",cn:"康复"},
+      {en:"vaccination",cn:"疫苗接种"},{en:"insomnia",cn:"失眠"},{en:"nutrition",cn:"营养"},
+      {en:"obesity",cn:"肥胖"},{en:"blood pressure",cn:"血压"},{en:"emergency",cn:"急诊"},
+    ]},
+    {scene:"商务经济", words:[
+      {en:"quarterly",cn:"季度的"},{en:"revenue",cn:"收入"},{en:"merger",cn:"合并"},
+      {en:"acquisition",cn:"收购"},{en:"logistics",cn:"物流"},{en:"inventory",cn:"库存"},
+      {en:"stakeholder",cn:"利益相关者"},{en:"budget",cn:"预算"},{en:"deficit",cn:"赤字"},
+      {en:"inflation",cn:"通货膨胀"},{en:"tariff",cn:"关税"},{en:"commodity",cn:"商品"},
+      {en:"dividend",cn:"股息"},{en:"entrepreneur",cn:"企业家"},{en:"subsidiary",cn:"子公司"},
+    ]},
+    {scene:"科技网络", words:[
+      {en:"algorithm",cn:"算法"},{en:"bandwidth",cn:"带宽"},{en:"cybersecurity",cn:"网络安全"},
+      {en:"database",cn:"数据库"},{en:"encryption",cn:"加密"},{en:"firewall",cn:"防火墙"},
+      {en:"interface",cn:"接口"},{en:"malware",cn:"恶意软件"},{en:"server",cn:"服务器"},
+      {en:"artificial intelligence",cn:"人工智能"},{en:"blockchain",cn:"区块链"},{en:"cloud computing",cn:"云计算"},
+    ]},
+    {scene:"环境生态", words:[
+      {en:"emission",cn:"排放"},{en:"renewable",cn:"可再生的"},{en:"sustainability",cn:"可持续性"},
+      {en:"ecosystem",cn:"生态系统"},{en:"biodiversity",cn:"生物多样性"},{en:"deforestation",cn:"砍伐森林"},
+      {en:"drought",cn:"干旱"},{en:"fossil fuel",cn:"化石燃料"},{en:"carbon footprint",cn:"碳足迹"},
+      {en:"conservation",cn:"保护"},{en:"pollutant",cn:"污染物"},{en:"recycle",cn:"回收"},
+    ]},
+  ],
+  resources: [
+    {name:"英语真题在线", url:"https://zhenti.burningvocabulary.cn/cet6", desc:"2016-2025年六级真题听力音频，在线播放", free:"部分免费", icon:"🎧"},
+    {name:"WeHUSTER 六级真题", url:"https://www.wehuster.com/cet6", desc:"按考试流程模拟听力练习，带答案解析", free:"免费", icon:"🎧"},
+    {name:"BBC 6 Minute English", url:"https://www.bbc.co.uk/learningenglish/english/features/6-minute-english", desc:"6分钟一期，语速适中，有文本，适合精听", free:"免费", icon:"📻"},
+    {name:"VOA Learning English", url:"https://learningenglish.voanews.com/", desc:"标准美音，语速较慢，适合初级精听训练", free:"免费", icon:"📻"},
+    {name:"TED Talks", url:"https://www.ted.com/", desc:"高质量演讲，适合练习讲座题型的听力理解", free:"免费", icon:"🎙️"},
+    {name:"NPR News", url:"https://www.npr.org/", desc:"美国国家公共电台，语速接近六级听力真题", free:"免费", icon:"📻"},
+  ],
+};
+
+function renderListening() {
+  const c = document.getElementById('listen-content');
+  if (currentListenTab === 0) {
+    // Core tips
+    c.innerHTML = `<div class="card">
+      <div class="card-title" style="margin-bottom:16px;">🎯 听力核心技巧（${LISTEN_TIPS.core.length}条）</div>
+      ${LISTEN_TIPS.core.map((t, i) => `
+        <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;">
+          <div style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--accent);">${i+1}. ${t.title}</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8;">${t.detail}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  } else if (currentListenTab === 1) {
+    // Question type strategies
+    c.innerHTML = LISTEN_TIPS.types.map(t => `
+      <div class="card">
+        <div class="card-title" style="margin-bottom:8px;">📝 ${t.title}</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">${t.desc}</div>
+        ${t.strategies.map((s, i) => `
+          <div style="display:flex;gap:10px;padding:8px 0;${i < t.strategies.length-1?'border-bottom:1px solid var(--border);':''}">
+            <span style="color:var(--accent);font-weight:600;font-size:13px;min-width:18px;">${i+1}.</span>
+            <span style="font-size:14px;line-height:1.6;">${s}</span>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  } else if (currentListenTab === 2) {
+    // High-frequency vocab by scene
+    c.innerHTML = `<div style="font-size:13px;color:var(--text2);margin-bottom:12px;">六级听力高频场景词汇，点击🔊听读音：</div>` +
+      LISTEN_TIPS.vocab.map(section => `
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">📚 ${section.scene}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
+            ${section.words.map(w => `
+              <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--bg);border-radius:6px;font-size:13px;">
+                <button onclick="speakWord('${w.en}')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;" title="播放读音">🔊</button>
+                <span style="font-weight:600;min-width:80px;">${w.en}</span>
+                <span style="color:var(--text2);">${w.cn}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+  } else {
+    // Resources
+    c.innerHTML = `<div class="card">
+      <div class="card-title" style="margin-bottom:12px;">🔗 真题听力资源</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">以下权威网站提供六级真题听力和英语听力训练：</div>
+      ${LISTEN_TIPS.resources.map(r => `
+        <a href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+          <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'">
+            <span style="font-size:20px;">${r.icon}</span>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:14px;">${r.name}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;">${r.desc}</div>
+            </div>
+            <span style="font-size:11px;padding:3px 8px;border-radius:6px;${r.free==='免费'?'background:rgba(52,211,153,.12);color:var(--green)':'background:rgba(251,191,36,.12);color:var(--orange)'}">${r.free}</span>
+          </div>
+        </a>
+      `).join('')}
+    </div>`;
+  }
+}
+
+// ══════════════════════════════════════
+// THEME TOGGLE
+// ══════════════════════════════════════
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-btn');
+  if (html.classList.contains('light')) {
+    html.classList.remove('light');
+    btn.textContent = '🌙';
+    localStorage.setItem('cet6_theme', 'dark');
+  } else {
+    html.classList.add('light');
+    btn.textContent = '☀️';
+    localStorage.setItem('cet6_theme', 'light');
+  }
+}
+
+// Load saved theme
+(function() {
+  const saved = localStorage.getItem('cet6_theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
+// ══════════════════════════════════════
+// PRONUNCIATION (Web Speech API)
+// ══════════════════════════════════════
+
+function speakWord(word) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-US';
+  utter.rate = 0.85;
+  utter.pitch = 1;
+  // Try to pick an English voice
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('US')) 
+    || voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) utter.voice = enVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+// Preload voices
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+// ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
 
@@ -2850,6 +3006,7 @@ updateStreak();
 updateDashboard();
 initVocab();
 renderReading();
+renderListening();
 renderWriting();
 renderTranslation();
 renderGrammar();
