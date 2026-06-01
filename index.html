@@ -868,6 +868,7 @@ function showCopyHint() {
           <button class="btn" onclick="markWord('模糊')">🤔 模糊</button>
           <button class="btn primary" onclick="markWord('认识')">✅ 认识</button>
           <button class="btn" onclick="nextWord()">➡️ 下一个</button>
+        <button class="btn" onclick="shuffleIndices();showCard();">🔀 随机</button>
         </div>
         <div style="text-align:center;font-size:13px;color:var(--text2);">
           <span id="fc-index">1</span> / <span id="fc-total">0</span>
@@ -1470,6 +1471,20 @@ function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 let data = loadData();
 let currentCardIndex = 0;
 let cardFlipped = false;
+let shuffledIndices = [];
+
+function shuffleIndices() {
+  shuffledIndices = [];
+  for (var i = 0; i < VOCAB.length; i++) shuffledIndices.push(i);
+  // Fisher-Yates shuffle
+  for (var i = shuffledIndices.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = shuffledIndices[i];
+    shuffledIndices[i] = shuffledIndices[j];
+    shuffledIndices[j] = temp;
+  }
+  currentCardIndex = 0;
+}
 let quizCurrent = null;
 let quizAnswered = false;
 
@@ -1583,8 +1598,9 @@ function switchVocabTab(tab) {
 }
 
 function showCard() {
-  if (currentCardIndex >= VOCAB.length) currentCardIndex = 0;
-  const v = VOCAB[currentCardIndex];
+  if (shuffledIndices.length === 0) shuffleIndices();
+  if (currentCardIndex >= shuffledIndices.length) { shuffleIndices(); }
+  var v = VOCAB[shuffledIndices[currentCardIndex]];
   document.getElementById('fc-word').textContent = v.word;
   document.getElementById('fc-phonetic').textContent = v.phonetic;
   document.getElementById('fc-pos').textContent = v.pos;
@@ -1611,7 +1627,7 @@ function flipCard() {
 }
 
 function markWord(status) {
-  const word = VOCAB[currentCardIndex].word;
+  var word = VOCAB[shuffledIndices[currentCardIndex]].word;
   data.wordStatus[word] = status;
   updateStreak();
   saveData(data);
