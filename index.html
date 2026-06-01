@@ -680,11 +680,68 @@
 </head>
 <body>
 
+<!-- WeChat in-app browser: try loading first, show redirect only on failure -->
+<div id="wx-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#f5f6fa;">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:20px;">📘</div>
+    <div style="font-size:22px;font-weight:700;color:#1a1d27;margin-bottom:12px;">CET-6 六级备考助手</div>
+    <div style="font-size:15px;color:#6b7084;line-height:1.7;margin-bottom:30px;max-width:320px;">
+      页面加载遇到问题，<strong style="color:#ef4444;">请点击右上角 ··· 选择「在浏览器中打开」</strong>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;">
+      <button onclick="copyUrl()" style="padding:14px;background:#5568f7;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
+        📋 复制链接
+      </button>
+      <div id="copy-hint" style="font-size:13px;color:#10b981;display:none;">✅ 链接已复制，请粘贴到浏览器地址栏打开</div>
+    </div>
+    <div style="margin-top:30px;font-size:12px;color:#9ca3af;">
+      推荐使用 Safari / Chrome 浏览器访问
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var ua = navigator.userAgent.toLowerCase();
+  var isWeChat = /micromessenger/i.test(ua);
+  if (!isWeChat) return;
+
+  // WeChat detected: set a timeout to check if page loaded correctly
+  setTimeout(function() {
+    var app = document.querySelector('.app');
+    // If the app element doesn't exist or is empty, page failed to load
+    if (!app || app.offsetHeight < 100) {
+      document.getElementById('wx-overlay').style.display = 'block';
+    }
+  }, 5000); // Wait 5 seconds for page to load
+})();
+function copyUrl() {
+  var url = 'https://zzz030981-max.github.io/cet6-study/';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(showCopyHint);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); showCopyHint();
+  }
+}
+function showCopyHint() {
+  var h = document.getElementById('copy-hint');
+  h.style.display = 'block';
+  setTimeout(function(){ h.style.display = 'none'; }, 3000);
+}
+</script>
+
+<div id="loading-screen" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;">
+  <div style="font-size:36px;margin-bottom:16px;">📘</div>
+  <div style="font-size:16px;color:var(--text2);">加载中...</div>
+</div>
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 <!-- Loading indicator -->
-<div id="loading-screen" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;">
+<div id="loading-screen" style="position:fixed;inset:0;z-index:9998;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;">
   <div style="font-size:36px;margin-bottom:16px;">📘</div>
   <div style="font-size:16px;color:var(--text2);">加载中...</div>
 </div>
@@ -934,12 +991,10 @@
 let VOCAB = [];
 var _vocabLoaded = false;
 (function(){
-  // Hide loading screen after 3 seconds no matter what
   setTimeout(function() {
     var ls = document.getElementById('loading-screen');
     if (ls) { ls.style.opacity = '0'; setTimeout(function(){ ls.style.display = 'none'; }, 300); }
   }, 3000);
-
   try {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'vocab.json', true);
@@ -957,11 +1012,7 @@ var _vocabLoaded = false;
     xhr.onerror = function() { if (!_vocabLoaded) { _vocabLoaded = true; initVocab(); } };
     xhr.send();
   } catch(e) { if (!_vocabLoaded) { _vocabLoaded = true; initVocab(); } }
-
-  // Fallback: if vocab hasn't loaded after 8 seconds, init anyway
-  setTimeout(function() {
-    if (!_vocabLoaded) { _vocabLoaded = true; initVocab(); }
-  }, 8000);
+  setTimeout(function() { if (!_vocabLoaded) { _vocabLoaded = true; initVocab(); } }, 8000);
 })();
 
 const READINGS = [
@@ -1453,9 +1504,9 @@ let quizAnswered = false;
 // ══════════════════════════════════════
 
 function switchSection(id) {
-  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelector(`.nav-item[data-section="${id}"]`).classList.add('active');
   if (window.innerWidth <= 768) toggleSidebar();
   if (id === 'dashboard') updateDashboard();
@@ -1486,8 +1537,8 @@ function updateStreak() {
 
 function updateDashboard() {
   const statuses = Object.values(data.wordStatus);
-  const learned = statuses.filter(function(s) { return s !== 'new').length;
-  const mastered = statuses.filter(function(s) { return s === '认识').length;
+  const learned = statuses.filter(s => s !== 'new').length;
+  const mastered = statuses.filter(s => s === '认识').length;
   document.getElementById('stat-words').textContent = learned;
   document.getElementById('stat-mastered').textContent = mastered;
   document.getElementById('stat-passages').textContent = data.readCompleted;
@@ -1511,7 +1562,7 @@ function renderTodayPlan() {
     {id:'translation', text:'翻译练习 1 段', time:'15 min'},
   ];
   const container = document.getElementById('today-plan');
-  container.innerHTML = plans.map(function(p) {
+  container.innerHTML = plans.map(p => {
     const done = data.todayPlan[p.id];
     return `<div class="plan-item ${done?'done':''}" onclick="togglePlan('${p.id}')">
       <div class="check">${done?'✓':''}</div>
@@ -1539,7 +1590,7 @@ function resetPlan() {
 
 function initVocab() {
   // init word statuses
-  VOCAB.forEach(function(v) {
+  VOCAB.forEach(v => {
     if (!data.wordStatus[v.word]) data.wordStatus[v.word] = 'new';
   });
   saveData(data);
@@ -1548,7 +1599,7 @@ function initVocab() {
 }
 
 function switchVocabTab(tab) {
-  document.querySelectorAll('#sec-vocabulary .tab').forEach(function(t,i) {
+  document.querySelectorAll('#sec-vocabulary .tab').forEach((t,i) => {
     t.classList.toggle('active', ['flashcard','list','quiz'][i] === tab);
   });
   document.getElementById('vocab-flashcard').style.display = tab === 'flashcard' ? '' : 'none';
@@ -1601,7 +1652,7 @@ function nextWord() {
 
 function renderWordList() {
   const container = document.getElementById('word-list-container');
-  container.innerHTML = VOCAB.map(function(v) {
+  container.innerHTML = VOCAB.map(v => {
     const s = data.wordStatus[v.word] || 'new';
     let tagClass = 'tag-new', tagText = '新词';
     if (s === '认识') { tagClass = 'tag-mastered'; tagText = '已掌握'; }
@@ -1618,7 +1669,7 @@ function renderWordList() {
 function filterWords() {
   const search = document.getElementById('word-search').value.toLowerCase();
   const filter = document.getElementById('word-filter').value;
-  document.querySelectorAll('.word-row').forEach(function(row) {
+  document.querySelectorAll('.word-row').forEach(row => {
     const word = row.dataset.word;
     const status = data.wordStatus[word] || 'new';
     const matchSearch = word.includes(search);
@@ -1658,10 +1709,10 @@ function nextQuiz() {
     if (!options.includes(rand.meaning)) options.push(rand.meaning);
   }
   // shuffle
-  options.sort(function() { return Math.random() - 0.5);
+  options.sort(() => Math.random() - 0.5);
 
   const container = document.getElementById('quiz-options');
-  container.innerHTML = options.map(function(opt, i) {
+  container.innerHTML = options.map((opt, i) => {
     return `<div class="option" onclick="selectQuizOption(this, '${opt.replace(/'/g, "\\'")}', '${word.meaning.replace(/'/g, "\\'")}')">
       <span class="letter">${'ABCD'[i]}</span>
       <span>${opt}</span>
@@ -1676,7 +1727,7 @@ function selectQuizOption(el, selected, correct) {
   quizAnswered = true;
   data.quizTotal++;
 
-  document.querySelectorAll('#quiz-options .option').forEach(function(opt) {
+  document.querySelectorAll('#quiz-options .option').forEach(opt => {
     if (opt.textContent.trim().substring(1).trim() === correct) {
       opt.classList.add('correct');
     }
@@ -1701,7 +1752,7 @@ function selectQuizOption(el, selected, correct) {
 let currentReadTab = 0;
 function switchReadTab(tab) {
   currentReadTab = tab;
-  document.querySelectorAll('#sec-reading .tab').forEach(function(t, i) { t.classList.toggle('active', i === tab); });
+  document.querySelectorAll('#sec-reading .tab').forEach((t, i) => t.classList.toggle('active', i === tab));
   renderReading();
 }
 
@@ -1751,7 +1802,7 @@ function renderReading() {
         <div style="font-size:12px;color:var(--text2);margin-top:4px;">2026年6月13日 15:00</div>
       </div>
       <div style="font-size:14px;color:var(--text2);margin:16px 0 12px;">以下为权威六级真题资源，点击直接跳转练习：</div>
-      ${EXAM_RESOURCES.map(function(r) { return `
+      ${EXAM_RESOURCES.map(r => `
         <a href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
           <div class="card" style="cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -1760,7 +1811,7 @@ function renderReading() {
             </div>
             <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.6;">${r.desc}</div>
             <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-              ${r.tags.map(function(t) { return `<span style="font-size:11px;padding:2px 7px;background:var(--bg);border-radius:5px;color:var(--text2)">${t}</span>`).join('')}
+              ${r.tags.map(t => `<span style="font-size:11px;padding:2px 7px;background:var(--bg);border-radius:5px;color:var(--text2)">${t}</span>`).join('')}
             </div>
           </div>
         </a>
@@ -1773,10 +1824,10 @@ function renderReading() {
     updateExamCountdown();
   } else {
     // Reading tips
-    container.innerHTML = READ_TIPS.map(function(section) { return `
+    container.innerHTML = READ_TIPS.map(section => `
       <div class="card">
         <div class="card-title" style="margin-bottom:14px;">📝 ${section.title}</div>
-        ${section.tips.map(function(tip, i) { return `
+        ${section.tips.map((tip, i) => `
           <div style="display:flex;gap:10px;padding:8px 0;${i < section.tips.length-1?'border-bottom:1px solid var(--border);':''}">
             <span style="color:var(--accent);font-weight:600;font-size:13px;min-width:18px;">${i+1}.</span>
             <span style="font-size:14px;line-height:1.6;">${tip}</span>
@@ -1813,7 +1864,7 @@ function selectReadingOption(el, ri, qi, oi) {
   block.dataset.answered = 'true';
 
   // mark correct/wrong
-  block.querySelectorAll('.option').forEach(function(opt, i) {
+  block.querySelectorAll('.option').forEach((opt, i) => {
     if (i === q.answer) opt.classList.add('correct');
     if (i === oi && oi !== q.answer) opt.classList.add('wrong');
   });
@@ -1832,7 +1883,7 @@ function selectReadingOption(el, ri, qi, oi) {
 
 function renderWriting() {
   const container = document.getElementById('writing-content');
-  container.innerHTML = WRITING_TEMPLATES.map(function(t, i) {
+  container.innerHTML = WRITING_TEMPLATES.map((t, i) => {
     return `<div class="template-card" onclick="toggleTemplate(${i})" id="tpl-${i}">
       <h3>📝 ${t.title}</h3>
       <p>${t.desc}</p>
@@ -1855,7 +1906,7 @@ function toggleTemplate(i) {
 let currentTransTab = 0;
 function switchTransTab(tab) {
   currentTransTab = tab;
-  document.querySelectorAll('#sec-translation .tab').forEach(function(t, i) { t.classList.toggle('active', i === tab); });
+  document.querySelectorAll('#sec-translation .tab').forEach((t, i) => t.classList.toggle('active', i === tab));
   renderTranslation();
 }
 
@@ -1884,7 +1935,7 @@ function renderTranslation() {
   const container = document.getElementById('translation-content');
   if (currentTransTab === 0) {
     // Practice exercises
-    container.innerHTML = TRANSLATIONS.map(function(t) {
+    container.innerHTML = TRANSLATIONS.map(t => {
       return `<div class="card">
         <div class="card-header">
           <span class="card-title">🔤 ${t.topic}</span>
@@ -1896,7 +1947,7 @@ function renderTranslation() {
         <div style="margin-bottom:12px;">
           <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">💡 关键词提示：</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            ${t.keywords.map(function(k) { return `<span style="font-size:12px;padding:3px 8px;background:rgba(108,123,247,.1);color:var(--accent);border-radius:6px;">${k}</span>`).join('')}
+            ${t.keywords.map(k => `<span style="font-size:12px;padding:3px 8px;background:rgba(108,123,247,.1);color:var(--accent);border-radius:6px;">${k}</span>`).join('')}
           </div>
         </div>
         <textarea class="translation-input" id="trans-input-${t.id}" placeholder="在此输入你的英文翻译..."></textarea>
@@ -1914,7 +1965,7 @@ function renderTranslation() {
     // Tips
     container.innerHTML = `<div class="card">
       <div class="card-title" style="margin-bottom:16px;">🎯 翻译应试技巧（${TRANS_TIPS.length}条）</div>
-      ${TRANS_TIPS.map(function(t, i) { return `
+      ${TRANS_TIPS.map((t, i) => `
         <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;">
           <div style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--accent);">${i+1}. ${t.title}</div>
           <div style="font-size:13px;color:var(--text2);line-height:1.8;">${t.detail}</div>
@@ -1926,7 +1977,7 @@ function renderTranslation() {
     container.innerHTML = `<div class="card">
       <div class="card-title" style="margin-bottom:12px;">🔗 翻译真题资源</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">以下权威网站提供六级翻译真题、答案解析和练习：</div>
-      ${TRANS_RESOURCES.map(function(r) { return `
+      ${TRANS_RESOURCES.map(r => `
         <a href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
           <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'">
             <span style="font-size:20px;">${r.icon}</span>
@@ -1945,13 +1996,13 @@ function renderTranslation() {
 function checkTranslation(id) {
   const input = document.getElementById(`trans-input-${id}`).value.trim();
   if (!input) return;
-  const t = TRANSLATIONS.find(function(x) { return x.id === id);
+  const t = TRANSLATIONS.find(x => x.id === id);
   const resultDiv = document.getElementById(`trans-result-${id}`);
 
   // Simple scoring based on keyword coverage
   const lowerInput = input.toLowerCase();
   let matched = 0;
-  t.keywords.forEach(function(k) {
+  t.keywords.forEach(k => {
     if (lowerInput.includes(k.toLowerCase())) matched++;
   });
   const score = Math.round((matched / t.keywords.length) * 100);
@@ -1960,11 +2011,11 @@ function checkTranslation(id) {
   if (score >= 80) scoreClass = 'score-high';
   else if (score >= 50) scoreClass = 'score-mid';
 
-  const missing = t.keywords.filter(function(k) { return !lowerInput.includes(k.toLowerCase()));
+  const missing = t.keywords.filter(k => !lowerInput.includes(k.toLowerCase()));
 
   resultDiv.innerHTML = `
     <div class="score-display ${scoreClass}">📊 关键词覆盖: ${score}% (${matched}/${t.keywords.length})</div>
-    ${missing.length > 0 ? `<div style="margin-top:8px;font-size:13px;color:var(--text2);">遗漏的关键词: ${missing.map(function(m) { return `<span style="color:var(--red)">${m}</span>`).join(', ')}</div>` : ''}
+    ${missing.length > 0 ? `<div style="margin-top:8px;font-size:13px;color:var(--text2);">遗漏的关键词: ${missing.map(m => `<span style="color:var(--red)">${m}</span>`).join(', ')}</div>` : ''}
     <div style="margin-top:8px;font-size:12px;color:var(--text2);">提示：关键词覆盖仅供参考，语法和表达的准确性同样重要。</div>
   `;
 }
@@ -1980,11 +2031,11 @@ function showReference(id) {
 
 function renderGrammar() {
   const container = document.getElementById('grammar-content');
-  container.innerHTML = GRAMMAR.map(function(g) {
+  container.innerHTML = GRAMMAR.map(g => {
     return `<div class="grammar-card">
       <h3>${g.icon} ${g.title}</h3>
       <div class="rule">${g.rule}</div>
-      ${g.examples.map(function(ex) {
+      ${g.examples.map(ex => {
         return `<div class="example">
           ✅ <em>${ex.correct}</em><br>
           ❌ <span class="wrong-ex">${ex.wrong}</span>
@@ -2002,7 +2053,7 @@ function renderGrammar() {
 let currentListenTab = 0;
 function switchListenTab(tab) {
   currentListenTab = tab;
-  document.querySelectorAll('#sec-listening .tab').forEach(function(t, i) { t.classList.toggle('active', i === tab); });
+  document.querySelectorAll('#sec-listening .tab').forEach((t, i) => t.classList.toggle('active', i === tab));
   renderListening();
 }
 
@@ -2101,7 +2152,7 @@ function renderListening() {
     // Core tips
     c.innerHTML = `<div class="card">
       <div class="card-title" style="margin-bottom:16px;">🎯 听力核心技巧（${LISTEN_TIPS.core.length}条）</div>
-      ${LISTEN_TIPS.core.map(function(t, i) { return `
+      ${LISTEN_TIPS.core.map((t, i) => `
         <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;">
           <div style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--accent);">${i+1}. ${t.title}</div>
           <div style="font-size:13px;color:var(--text2);line-height:1.8;">${t.detail}</div>
@@ -2110,11 +2161,11 @@ function renderListening() {
     </div>`;
   } else if (currentListenTab === 1) {
     // Question type strategies
-    c.innerHTML = LISTEN_TIPS.types.map(function(t) { return `
+    c.innerHTML = LISTEN_TIPS.types.map(t => `
       <div class="card">
         <div class="card-title" style="margin-bottom:8px;">📝 ${t.title}</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">${t.desc}</div>
-        ${t.strategies.map(function(s, i) { return `
+        ${t.strategies.map((s, i) => `
           <div style="display:flex;gap:10px;padding:8px 0;${i < t.strategies.length-1?'border-bottom:1px solid var(--border);':''}">
             <span style="color:var(--accent);font-weight:600;font-size:13px;min-width:18px;">${i+1}.</span>
             <span style="font-size:14px;line-height:1.6;">${s}</span>
@@ -2125,11 +2176,11 @@ function renderListening() {
   } else if (currentListenTab === 2) {
     // High-frequency vocab by scene
     c.innerHTML = `<div style="font-size:13px;color:var(--text2);margin-bottom:12px;">六级听力高频场景词汇，点击🔊听读音：</div>` +
-      LISTEN_TIPS.vocab.map(function(section) { return `
+      LISTEN_TIPS.vocab.map(section => `
         <div class="card">
           <div class="card-title" style="margin-bottom:12px;">📚 ${section.scene}</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
-            ${section.words.map(function(w) { return `
+            ${section.words.map(w => `
               <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--bg);border-radius:6px;font-size:13px;">
                 <button onclick="speakWord('${w.en}')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;" title="播放读音">🔊</button>
                 <span style="font-weight:600;min-width:80px;">${w.en}</span>
@@ -2144,7 +2195,7 @@ function renderListening() {
     c.innerHTML = `<div class="card">
       <div class="card-title" style="margin-bottom:12px;">🔗 真题听力资源</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">以下权威网站提供六级真题听力和英语听力训练：</div>
-      ${LISTEN_TIPS.resources.map(function(r) { return `
+      ${LISTEN_TIPS.resources.map(r => `
         <a href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
           <div style="padding:14px;background:var(--bg);border-radius:8px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'">
             <span style="font-size:20px;">${r.icon}</span>
@@ -2193,7 +2244,6 @@ function toggleTheme() {
 // ══════════════════════════════════════
 
 function speakWord(word) {
-  try {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(word);
@@ -2202,19 +2252,16 @@ function speakWord(word) {
   utter.pitch = 1;
   // Try to pick an English voice
   const voices = window.speechSynthesis.getVoices();
-  const enVoice = voices.find(function(v) { return v.lang.startsWith('en') && v.name.includes('US')) 
-    || voices.find(function(v) { return v.lang.startsWith('en'));
+  const enVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('US')) 
+    || voices.find(v => v.lang.startsWith('en'));
   if (enVoice) utter.voice = enVoice;
   window.speechSynthesis.speak(utter);
-  } catch(e) {}
 }
 
 // Preload voices
-try {
-  if ('speechSynthesis' in window) {
-    speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
-  }
-} catch(e) {}
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
 
 // ══════════════════════════════════════
 // INIT
@@ -2228,7 +2275,9 @@ renderWriting();
 renderTranslation();
 renderGrammar();
 
-// Loading screen auto-hides after 3s (see vocab loader)
+// Hide loading screen
+var ls = document.getElementById('loading-screen');
+if (ls) { ls.style.opacity = '0'; setTimeout(function(){ ls.style.display = 'none'; }, 300); }
 </script>
 </body>
 </html>
